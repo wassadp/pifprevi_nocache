@@ -5,11 +5,9 @@ import datetime
 from functools import reduce
 import time as tm
 import openpyxl
-
    
     
 st.subheader("Programme complet :")
-
 uploaded_file = st.file_uploader("Choisir un fichier :", key=1)
 if uploaded_file is not None:
     @st.cache(suppress_st_warning=True,allow_output_mutation=True)
@@ -24,6 +22,21 @@ if uploaded_file is not None:
     l_date = pd.to_datetime(df_pgrm['Local Date'].unique().tolist()).date
     l_date = sorted(l_date)
 
+    uploaded_file1 = st.file_uploader("Choisir le fichier hypotheses_repartition_correspondances.xlsx :", key=4)
+    if uploaded_file1 is not None:
+        @st.cache(suppress_st_warning=True,allow_output_mutation=True)
+        def HYPOTHESE_REP():
+            df = pd.read_excel(uploaded_file1, name_hyp)
+            df['plage'] = 'am'
+            df.loc[df['heure_debut']>=(datetime.time(17)) , 'plage'] = 'pm'             
+            return df
+
+    uploaded_file2 = st.file_uploader("Choisir le fichier nouvelles_courbes_presentation :", key=5)
+    if uploaded_file2 is not None:
+        @st.cache(suppress_st_warning=True,allow_output_mutation=True)
+        def COURBE_PRES(t):
+            df = pd.read_excel(uploaded_file2, t)             
+            return df
     col1, col2 = st.columns(2)
     with col1:
         debut = st.date_input("Date de début :",datetime.date(2022, 7, 6), key=10)
@@ -61,14 +74,8 @@ if uploaded_file is not None:
         path_output = r"" + "output_export_pif"
         name_output = "export_pif"
         
-        
-        def HYPOTHESE_REP():
-            df = pd.read_excel(path_hyp, name_hyp)
-            df['plage'] = 'am'
-            st.write(df['heure_debut'][0])
-            df.loc[df['heure_debut']>=(datetime.time(17)) , 'plage'] = 'pm'
 
-            return df
+
         
         def FAISCEAUX_IATA():
             df = pd.read_excel(path_faisceaux, name_faisceaux)
@@ -435,7 +442,7 @@ if uploaded_file is not None:
         liste_df_courbe_presentation_terminal = []
         
         for t in list_terminaux:
-            liste_df_courbe_presentation_terminal.append((t, pd.read_excel(path_courbes_term, t)))
+            liste_df_courbe_presentation_terminal.append((t, COURBE_PRES(t)))
         
         def courbe(decalage, df_c):
             l_f = df_c['faisceau_geographique'].unique().tolist()
@@ -519,7 +526,6 @@ if uploaded_file is not None:
             courbe_deb_l = [0.1, 0.45, 0.45]
             courbe_deb_m = [0, 0.5, 0.5]
             
-            st.write(dispatch_df.columns.tolist())
             df_site = ITERATE_SITE(dispatch_df)
             
             
@@ -568,11 +574,7 @@ if uploaded_file is not None:
                 time_r = time(hour = l[0], minute = l[1], second = l[2])
                 return time_r
 
-            st.write(dispatch_df)
-            #st.write(df_site)
             dispatch_df['Horaire théorique'] = dispatch_df['Horaire théorique'].apply(lambda x: CLEAN_TIME(x))
-
-            st.write(df_site["K CNT"])
 
             for r in range(dispatch_df.shape[0]):
                  
@@ -738,8 +740,8 @@ if uploaded_file is not None:
                     print(str(r)+"/"+str(dispatch_df.shape[0]))
 
             end = tm.time()
-            st.write('dispatch')
-            st.write(end - start5)         
+            #st.write('dispatch')
+            #st.write(end - start5)         
             my_bar.progress(o +10)     
             o += 10   
 
@@ -879,8 +881,8 @@ if uploaded_file is not None:
 
             end2 = tm.time()
 
-            st.write('Convo')
-            st.write(end2 - start2)  
+            #st.write('Convo')
+            #st.write(end2 - start2)  
 
             return df_site
 
@@ -890,8 +892,6 @@ if uploaded_file is not None:
             
             df = pd.DataFrame(columns=col)
             df['jour'] = df_site["K CNT"]['jour'].tolist() * len(df_site)
-
-            st.write(df)
             
             for i,j in zip(df_site,range(len(df_site))):
 
@@ -899,11 +899,7 @@ if uploaded_file is not None:
                 df['heure'][len(df_site[i])*j:len(df_site[i])*(j+1)] = df_site[i]['heure']
                 df['site'][len(df_site[i])*j:len(df_site[i])*(j+1)] = df_site[i]['site']
                 df['type'][len(df_site[i])*j:len(df_site[i])*(j+1)] = df_site[i]['type']
-
-
-
-            st.write(df)    
-                
+                 
             print("\nDébut de l'export...")
             df.to_excel(path, sheet_name=name_output)
 
@@ -916,6 +912,6 @@ if uploaded_file is not None:
         TO_EXCEL(EXPORT_PIF(dispatch, df_faisceaux, l_faisceaux, l_courbe_geo_t), path = directory_exp)
         end3 = tm.time()
 
-        st.write(end3 - start_all)  
+        #st.write(end3 - start_all)  
         st.info("Export PIF créé avec succès !\nFichier accessible dans le dossier suivant :\n" + path_output
                             + "\n\nPour lancer une nouvelle étude, lancer uniquement 'CHOISIR LES DATES'")
