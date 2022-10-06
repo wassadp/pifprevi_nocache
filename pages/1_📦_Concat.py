@@ -413,7 +413,13 @@ if uploaded_file3 is not None:
 
     st.markdown('<a href="/pi_previ" target="_self">Aller directement à l\'outils Pif prévi</a>', unsafe_allow_html=True)
 
-
+    hide_streamlit_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
 
 
