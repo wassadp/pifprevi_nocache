@@ -1,0 +1,4 @@
+openpyxl
+scipy
+pyxlsb
+xlsxwriter

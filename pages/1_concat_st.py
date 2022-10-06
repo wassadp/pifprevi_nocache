@@ -3,6 +3,7 @@ import streamlit as st
 from io import BytesIO
 from pyxlsb import open_workbook as open_xlsb
              
+st.set_page_config(page_title="Concat", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
 
 
 #   Noms des feuilles, peut changer dans le temps si qqn le modifie
