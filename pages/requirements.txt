@@ -1,3 +1,5 @@
 openpyxl
 scipy
 pyxlsb
+xlsxwriter
+io
