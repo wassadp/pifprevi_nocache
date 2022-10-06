@@ -913,7 +913,6 @@ if uploaded_file is not None:
         
         import io
         from pyxlsb import open_workbook as open_xlsb
-        st.write(x)
 
         
         buffer = io.BytesIO()
@@ -929,3 +928,4 @@ if uploaded_file is not None:
             file_name=directory_exp,
             mime="application/vnd.ms-excel"
             )
+        
