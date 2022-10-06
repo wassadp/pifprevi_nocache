@@ -50,6 +50,7 @@ if uploaded_file2 is not None:
     placeholder0 = st.empty()
     st.success("Prévisions chargées !")
 
+st.subheader("Fichiers affectation :")
 uploaded_file3 = st.file_uploader("Choisir le fichier affectation oal :", key=4)
 if uploaded_file3 is not None:
     df_oal = pd.read_excel(uploaded_file3, name_sheet_oal)
