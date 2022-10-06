@@ -900,18 +900,32 @@ if uploaded_file is not None:
                 df['site'][len(df_site[i])*j:len(df_site[i])*(j+1)] = df_site[i]['site']
                 df['type'][len(df_site[i])*j:len(df_site[i])*(j+1)] = df_site[i]['type']
                  
-            print("\nDébut de l'export...")
-            df.to_excel(path, sheet_name=name_output)
+            return df
 
-            print("Export PIF créé avec succès")
-            print("Rappel\ndébut :", start_date, "\nfin :", end_date,"\n") 
-            print("Pour effectuer une autre prévision, veuillez sélectionner de nouvelles dates\nNe pas sélectionner de nouveau le programme complet")
 
-        
         directory_exp = "export_pif_du_" + str(start_date.date()) + "_au_" + str(end_date.date()) + ".xlsx"
-        TO_EXCEL(EXPORT_PIF(dispatch, df_faisceaux, l_faisceaux, l_courbe_geo_t), path = directory_exp)
+        x = TO_EXCEL(EXPORT_PIF(dispatch, df_faisceaux, l_faisceaux, l_courbe_geo_t), path = directory_exp)
         end3 = tm.time()
 
         #st.write(end3 - start_all)  
         st.info("Export PIF créé avec succès !\nFichier accessible dans le dossier suivant :\n" + path_output
                             + "\n\nPour lancer une nouvelle étude, lancer uniquement 'CHOISIR LES DATES'")
+        
+        import io
+        from pyxlsb import open_workbook as open_xlsb
+        st.write(x)
+
+        
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            # Write each dataframe to a different worksheet.
+            x.to_excel(writer, sheet_name=name_output)
+            # Close the Pandas Excel writer and output the Excel file to the buffer
+            writer.save()
+
+            st.download_button(
+            label="Télécharger fichier Export pif",
+            data=buffer,
+            file_name=directory_exp,
+            mime="application/vnd.ms-excel"
+            )
