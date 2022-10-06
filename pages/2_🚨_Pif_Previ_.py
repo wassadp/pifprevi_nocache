@@ -6,7 +6,7 @@ from functools import reduce
 import time as tm
 import openpyxl
    
-st.set_page_config(page_title="Pif Previ", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
+st.set_page_config(page_title="Pif Previ", page_icon="🚨", layout="centered", initial_sidebar_state="auto", menu_items=None)
 
 hide_streamlit_style = """
             <style>
