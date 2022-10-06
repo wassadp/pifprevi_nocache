@@ -6,7 +6,8 @@ from functools import reduce
 import time as tm
 import openpyxl
    
-    
+st.set_page_config(page_title="Pif Previ", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
+
 st.subheader("Programme complet :")
 uploaded_file = st.file_uploader("Choisir un fichier :", key=1)
 if uploaded_file is not None:
@@ -928,4 +929,3 @@ if uploaded_file is not None:
             file_name=directory_exp,
             mime="application/vnd.ms-excel"
             )
-        
