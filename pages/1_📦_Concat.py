@@ -32,22 +32,7 @@ if uploaded_file is not None:
         st.success("Prévision AF 1 chargée !")
         return df_af_1
     
-    df_af_1 = df_af_1()    
-st.subheader("Prévision activité AF 2 :")
-uploaded_file1 = st.file_uploader("Choisir un fichier :", key=2)
-
-if uploaded_file1 is not None:
-    @st.cache(suppress_st_warning=True)
-    def df_af_2():
-        with st.spinner('Chargemement prévision AF 2 ...'):
-            df_af_2 = pd.read_excel(uploaded_file1,name_sheet_af,usecols=['A/D', 'Cie Ope', 'Num Vol', 'Porteur', 'Prov Dest', 
-                        'Service emb/deb', 'Local Date', 'Semaine', 
-                        'Jour', 'Scheduled Local Time 2', 'Plage',  
-                        'Pax LOC TOT', 'Pax CNT TOT', 'PAX TOT'])
-        st.success("Prévision AF 2 chargée !")
-        return df_af_2
-    
-    df_af_2 = df_af_2()       
+    df_af_1 = df_af_1()      
 
 st.subheader("Prévision activité ADP :")
 uploaded_file2 = st.file_uploader("Choisir un fichier :", key=3)
@@ -88,7 +73,7 @@ if uploaded_file3 is not None:
     #df_af_1, df_af_2, df_cies_1 = clean()
     
     min_date_previ = min(df_af_1['Local Date']) # min prévi AF 1
-    max_date_previ = max(df_af_2['Local Date']) # max prévi AF 2
+    max_date_previ = max(df_af_1['Local Date']) # max prévi AF 2
     min_date_adp = min(df_cies_1['Local Date'])
     max_date_adp = max(df_cies_1['Local Date'])
 
@@ -105,7 +90,7 @@ if uploaded_file3 is not None:
         st.warning("Réalisé d'activité est limitant")
         
         df_af_1 = df_af_1.loc[(df_af_1['Local Date'] >= min_date_adp)]
-        df_af_2 = df_af_2.loc[(df_af_2['Local Date'] <= max_date_adp)]
+        df_af_2 = df_af_1.loc[(df_af_1['Local Date'] <= max_date_adp)]
         
     elif min_date_adp >= min_date_previ and max_date_adp >= max_date_previ and max_date_previ >= min_date_adp:
         st.warning("Programme ADP et AF 2 limitant")
@@ -117,7 +102,7 @@ if uploaded_file3 is not None:
         st.warning("Programme AF 1 et ADP limitant")
         
         df_cies_1 = df_cies_1.loc[(df_cies_1['Local Date'] >= min_date_previ)]
-        df_af_2 = df_af_2.loc[(df_af_2['Local Date'] <= max_date_adp)]
+        df_af_2 = df_af_1.loc[(df_af_1['Local Date'] <= max_date_adp)]
         
     else:
         st.warning("Les programmes AF/ADP ne se recouvrent pas, impossible de continuer"
@@ -136,9 +121,6 @@ if uploaded_file3 is not None:
                                     "Service emb/deb":"Libellé terminal",
                                     "Scheduled Local Time 2":"Horaire théorique"})
 
-    df_af_2 = df_af_2.rename(columns={"Jour":"Jour (nb)",
-                                    "Service emb/deb":"Libellé terminal",
-                                    "Scheduled Local Time 2":"Horaire théorique"})
 
     #######################################################################
     terminaux_cies = ['Terminal 2A', 
@@ -266,10 +248,9 @@ if uploaded_file3 is not None:
         else:
             st.error("Erreur dans les données : PAX (LOC + CNT) <> PAX TOT")
 
-    def CONCAT_PGRM_AF_ADP(df_af_1, df_af_2, df_cies_1, df_cies_oal_1):
+    def CONCAT_PGRM_AF_ADP(df_af_1, df_cies_1, df_cies_oal_1):
         L = []
         L.append(df_af_1)
-        L.append(df_af_2)
         L.append(df_cies_1)
     #            L.append(df_cies_2)
         L.append(df_cies_oal_1)
@@ -292,7 +273,7 @@ if uploaded_file3 is not None:
     ###############################################################################
     placeholder.info("Préparation à la concaténation des prévisions ...")
     placeholder.info("Récupération des champs vides ...")
-    df_pgrm_concat = CONCAT_PGRM_AF_ADP(df_af_1, df_af_2, df_cies_concat_1, data_cies_oal_concat_1)
+    df_pgrm_concat = CONCAT_PGRM_AF_ADP(df_af_1, df_cies_concat_1, data_cies_oal_concat_1)
     # C'est le DF avant d'avoir enlevé les nan
 
     # Permet de récupérer certains champs vides dans les programmes AF et ADP

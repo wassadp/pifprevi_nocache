@@ -49,9 +49,9 @@ if uploaded_file is not None:
             return df
     col1, col2 = st.columns(2)
     with col1:
-        debut = st.date_input("Date de début :",datetime.date(2022, 7, 6), key=10)
+        debut = st.date_input("Date de début :",datetime.date(2022, 10, 6), key=10)
     with col2:    
-        fin = st.date_input("Date de fin :",datetime.date(2022, 7, 6), key=2)
+        fin = st.date_input("Date de fin :",datetime.date(2022, 10, 6), key=2)
     
     start_date = pd.to_datetime(debut)
     end_date = pd.to_datetime(fin) 
@@ -400,7 +400,8 @@ if uploaded_file is not None:
             dispatch_df['Galerie EF'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
                         [l_a_k_am['Pax CNT TOT'] * (float(hyp_k_f_am) + float(hyp_k_g_am)),
                         l_a_k_pm['Pax CNT TOT'] * (float(hyp_k_f_pm) + float(hyp_k_g_pm)),
-                        l_a_m_am['Pax CNT TOT'] * hyp_m_f_am, l_a_m_pm['Pax CNT TOT'] * hyp_m_f_pm])
+                        l_a_m_am['Pax CNT TOT'] * hyp_m_f_am, 
+                        l_a_m_pm['Pax CNT TOT'] * hyp_m_f_pm])
             
         #    C2F
             dispatch_df['C2F'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
