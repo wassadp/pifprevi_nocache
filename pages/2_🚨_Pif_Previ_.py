@@ -8,6 +8,15 @@ import openpyxl
    
 st.set_page_config(page_title="Pif Previ", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
 
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+
 st.subheader("Programme complet :")
 uploaded_file = st.file_uploader("Choisir un fichier :", key=1)
 if uploaded_file is not None:
@@ -930,10 +939,3 @@ if uploaded_file is not None:
             mime="application/vnd.ms-excel"
             )
 
-        hide_streamlit_style = """
-                    <style>
-                    #MainMenu {visibility: hidden;}
-                    footer {visibility: hidden;}
-                    </style>
-                    """
-        st.markdown(hide_streamlit_style, unsafe_allow_html=True) 

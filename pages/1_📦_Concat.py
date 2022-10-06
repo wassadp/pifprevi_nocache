@@ -5,6 +5,13 @@ from pyxlsb import open_workbook as open_xlsb
              
 st.set_page_config(page_title="Concat", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
 
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
 #   Noms des feuilles, peut changer dans le temps si qqn le modifie
 st.title("Concat 2.0")
@@ -413,13 +420,7 @@ if uploaded_file3 is not None:
 
     st.markdown('<a href="/pi_previ" target="_self">Aller directement à l\'outils Pif prévi</a>', unsafe_allow_html=True)
 
-    hide_streamlit_style = """
-                <style>
-                #MainMenu {visibility: hidden;}
-                footer {visibility: hidden;}
-                </style>
-                """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
 
 
 
