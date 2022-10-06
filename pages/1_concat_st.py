@@ -389,24 +389,24 @@ if uploaded_file3 is not None:
     df_pgrm_concat.to_excel(directory_concat, sheet_name = "pgrm_complet")
     placeholder.success("Programme complet exporté !")
     placeholder.info("Fin du traitement")
-
-    placeholder.info("Programme Complet créé avec succès sous le nom 'pgrm_complet_" + str(pd.datetime.now())[:10] + ".xlsx'")
     
-    def to_excel(df):
-        output = BytesIO()
-        writer = pd.ExcelWriter(output, engine='xlsxwriter')
-        df.to_excel(writer, index=False, sheet_name="pgrm_complet")
-        workbook = writer.book
-        worksheet = writer.sheets["pgrm_complet"]
-        format1 = workbook.add_format({'num_format': '0.00'}) 
-        worksheet.set_column('A:A', None, format1)  
+    import io
+    from pyxlsb import open_workbook as open_xlsb
+
+    
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        # Write each dataframe to a different worksheet.
+        df_pgrm_concat.to_excel(writer, sheet_name= "pgrm_complet")
+        # Close the Pandas Excel writer and output the Excel file to the buffer
         writer.save()
-        processed_data = output.getvalue()
-        return processed_data
-    df_xlsx = to_excel(df_pgrm_concat)
-    # st.download_button(label='📥 Download Current Result',
-    #                             data=df_xlsx ,
-    #                             file_name= "pgrm_complet_" + str(pd.datetime.now())[:10] + ".xlsx")
+
+        st.download_button(
+        label="Télécharger fichier Programme complet",
+        data=buffer,
+        file_name=directory_concat,
+        mime="application/vnd.ms-excel"
+        )
     
     st.markdown('<a href="/concat_st" target="_self">Revenir à l\'Accueil</a>', unsafe_allow_html=True)
 
