@@ -44,17 +44,26 @@ if uploaded_file1 is not None:
 
 st.subheader("Prévision activité ADP :")
 uploaded_file2 = st.file_uploader("Choisir un fichier :", key=3)
-
 if uploaded_file2 is not None:
     with st.spinner('Chargemement prévision ADP ...'):
         df_cies_1 = pd.read_excel(uploaded_file2)
     placeholder0 = st.empty()
     st.success("Prévisions chargées !")
 
+uploaded_file3 = st.file_uploader("Choisir le fichier affectation oal :", key=4)
+if uploaded_file3 is not None:
+    df_oal = pd.read_excel(uploaded_file3, name_sheet_oal)
+    st.success('Affectation OAL chargée !')
 
-    
+name_taux = "taux affectation previ_rea"
+
+uploaded_file4 = st.file_uploader("Choisir le fichier taux_affectation.xlsx :", key=5)
+if uploaded_file3 is not None:
+    df_taux = pd.read_excel(uploaded_file4, name_taux)
+    st.success('Taux affectation chargée !')
 
 
+    #Inutile pour le moment 
     @st.cache
     def clean():
         df_af_1 = pd.read_excel("Prévisions d'activité Semaines 33-37 du 17.08.2022.xlsx",name_sheet_af, usecols=['A/D', 'Cie Ope', 'Num Vol', 'Porteur', 'Prov Dest', 
@@ -68,7 +77,7 @@ if uploaded_file2 is not None:
         df_cies_1 = pd.read_excel("Prévisions d'activité cies semaines 35_42 au 2022-08-23.xlsx")
         return df_af_1, df_af_2, df_cies_1
 
-#df_af_1, df_af_2, df_cies_1 = clean()
+    #df_af_1, df_af_2, df_cies_1 = clean()
     
     min_date_previ = min(df_af_1['Local Date']) # min prévi AF 1
     max_date_previ = max(df_af_2['Local Date']) # max prévi AF 2
@@ -113,9 +122,7 @@ if uploaded_file2 is not None:
     #       correspondance par OAL
     placeholder = st.empty()
     
-    placeholder.info('Chargemement affectation oal ...')
-    df_oal = pd.read_excel("Affectation_OALs_T2E.xlsx", name_sheet_oal)
-    placeholder.success('Affectation OAL chargée !')
+
 
     df_af_1 = df_af_1.rename(columns={"Jour":"Jour (nb)",
                                     "Service emb/deb":"Libellé terminal",
@@ -306,8 +313,8 @@ if uploaded_file2 is not None:
     ### Taux Affectation pgrm AF ###
     df_previ = df_pgrm_concat.loc[(df_pgrm_concat['Libellé terminal'].isin(['EK', 'EL', 'EM']) == True)]
 
-    name_taux = "taux affectation previ_rea"
-    df_taux = pd.read_excel("taux_affectation.xlsx", name_taux)
+
+    
     df_taux.rename(columns = {'Unnamed: 0':'Code IATA compagnie'}, inplace = True)
     df_taux = df_taux.drop(df_taux.loc[(df_taux['taux K'] == 0) & (df_taux['taux L'] == 0) & (df_taux['taux M'] == 0)].index)
     df_taux.reset_index(inplace=True)
