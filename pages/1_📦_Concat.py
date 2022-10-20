@@ -90,7 +90,7 @@ if uploaded_file3 is not None:
         st.warning("Réalisé d'activité est limitant")
         
         df_af_1 = df_af_1.loc[(df_af_1['Local Date'] >= min_date_adp)]
-        df_af_2 = df_af_1.loc[(df_af_1['Local Date'] <= max_date_adp)]
+        df_af_1 = df_af_1.loc[(df_af_1['Local Date'] <= max_date_adp)]
         
     elif min_date_adp >= min_date_previ and max_date_adp >= max_date_previ and max_date_previ >= min_date_adp:
         st.warning("Programme ADP et AF 2 limitant")
@@ -102,7 +102,7 @@ if uploaded_file3 is not None:
         st.warning("Programme AF 1 et ADP limitant")
         
         df_cies_1 = df_cies_1.loc[(df_cies_1['Local Date'] >= min_date_previ)]
-        df_af_2 = df_af_1.loc[(df_af_1['Local Date'] <= max_date_adp)]
+        df_af_1 = df_af_1.loc[(df_af_1['Local Date'] <= max_date_adp)]
         
     else:
         st.warning("Les programmes AF/ADP ne se recouvrent pas, impossible de continuer"
