@@ -9,9 +9,15 @@ st.set_page_config(page_title="OutilsPIF V2", page_icon="🏠", layout="centered
 
 st.title('OutilsPIF V2') 
 
-st.write("Cet outil sert à regrouper plusieurs actions effectués au sein de l'IngeX de CDGD. Vous retrouverez ainsi :\n\nUn outil de concaténation des programmes "
-                        + "AF Skyteam et des programmes ADP.\n\nUn outil de prévisions des flux aux différents sites de PIF dans l'aéroport CDG.\n"
-                        + "\nUn outil de mise en forme des réalisés PIF.")
+st.write("Cet outil sert à regrouper plusieurs actions effectués au sein de l'IngeX de CDGD.")
+st.write("Vous retrouverez ainsi")
+st.markdown("Onglet **Concat** : Un outil de concaténation des programmes AF Skyteam et des programmes ADP.")
+st.markdown("Onglet **Pif Previ** : Un outil de prévisions des flux aux différents sites de PIF dans l'aéroport CDG")
+with st.expander("🔽 En développement 🔽"):
+    st.markdown("Onglet **Export PIF** : Un outil de mise en forme des réalisés PIF.")
+
+st.sidebar.info("Version Prototype : 0.2")
+
 
 hide_streamlit_style = """
             <style>
