@@ -3,3 +3,4 @@ scipy
 pyxlsb
 xlsxwriter
 xlrd
+numpy
