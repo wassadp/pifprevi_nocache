@@ -72,6 +72,8 @@ if uploaded_file3 is not None:
 
     #df_af_1, df_af_2, df_cies_1 = clean()
     
+    df_af_1['Service emb/deb'] = np.where((df_af_1["A/D"]=="D") & (df_af_1["Affectation"]=="F"), 'F', df_af_1['Service emb/deb'])
+
     min_date_previ = min(df_af_1['Local Date']) # min prévi AF 1
     max_date_previ = max(df_af_1['Local Date']) # max prévi AF 2
     min_date_adp = min(df_cies_1['Local Date'])
