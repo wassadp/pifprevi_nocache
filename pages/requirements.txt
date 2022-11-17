@@ -4,4 +4,3 @@ pyxlsb
 xlsxwriter
 numpy
 xlwt
-locale
