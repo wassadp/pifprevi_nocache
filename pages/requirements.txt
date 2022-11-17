@@ -2,6 +2,6 @@ openpyxl
 scipy
 pyxlsb
 xlsxwriter
+numpy
 xlwt
-calendar
 locale

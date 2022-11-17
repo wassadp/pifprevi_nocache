@@ -4,5 +4,4 @@ pyxlsb
 xlsxwriter
 numpy
 xlwt
-calendar
 locale
