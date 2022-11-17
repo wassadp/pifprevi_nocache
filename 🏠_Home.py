@@ -16,7 +16,7 @@ st.markdown("Onglet **Pif Previ** : Un outil de prévisions des flux aux différ
 with st.expander("🔽 En développement 🔽"):
     st.markdown("Onglet **Export PIF** : Un outil de mise en forme des réalisés PIF.")
 
-st.sidebar.info("Version Prototype : 0.2")
+st.sidebar.info("Version Prototype : 0.3")
 
 
 hide_streamlit_style = """
