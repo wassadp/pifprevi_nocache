@@ -24,9 +24,7 @@ def findDay(date):
  
 uploaded_file = st.file_uploader("Choose a file")
 if uploaded_file is not None:
-    df = pd.read_excel(uploaded_file, sheet_name="Programme brut")
-
-    #df  = pd.read_excel("prévi_départ\export_pif_du_2022-08-23_au_2022-09-25.xlsx")
+    df = pd.read_excel(uploaded_file)
     df1 = pd.DataFrame(columns=df.columns)
     wb= Workbook()
     writer = pd.ExcelWriter('multiple3.xlsx', engine='xlsxwriter')
