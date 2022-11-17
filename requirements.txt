@@ -2,5 +2,7 @@ openpyxl
 scipy
 pyxlsb
 xlsxwriter
-xlrd
 numpy
+xlwt
+calendar
+locale
