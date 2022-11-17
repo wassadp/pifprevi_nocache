@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import numpy as np
 from io import BytesIO
 from pyxlsb import open_workbook as open_xlsb
              
@@ -25,7 +26,7 @@ if uploaded_file is not None:
     @st.cache(suppress_st_warning=True)
     def df_af_1():
         with st.spinner('Chargemement prévision AF 1 ...'):
-            df_af_1 = pd.read_excel(uploaded_file,name_sheet_af,usecols=['A/D', 'Cie Ope', 'Num Vol', 'Porteur', 'Prov Dest', 
+            df_af_1 = pd.read_excel(uploaded_file,name_sheet_af,usecols=['A/D', 'Cie Ope', 'Num Vol', 'Porteur', 'Prov Dest', 'Affectation',
                         'Service emb/deb', 'Local Date', 'Semaine', 
                         'Jour', 'Scheduled Local Time 2', 'Plage',  
                         'Pax LOC TOT', 'Pax CNT TOT', 'PAX TOT'])
@@ -72,6 +73,8 @@ if uploaded_file3 is not None:
 
     #df_af_1, df_af_2, df_cies_1 = clean()
     
+    df_af_1['Service emb/deb'] = np.where((df_af_1["A/D"]=="D") & (df_af_1["Affectation"]=="F"), 'F', df_af_1['Service emb/deb'])
+
     min_date_previ = min(df_af_1['Local Date']) # min prévi AF 1
     max_date_previ = max(df_af_1['Local Date']) # max prévi AF 2
     min_date_adp = min(df_cies_1['Local Date'])

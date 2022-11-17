@@ -2,3 +2,5 @@ openpyxl
 scipy
 pyxlsb
 xlsxwriter
+xlrd
+numpy
