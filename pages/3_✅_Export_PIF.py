@@ -28,10 +28,10 @@ if uploaded_file is not None:
     df1 = pd.DataFrame(columns=df.columns)
     wb= Workbook()
     writer = pd.ExcelWriter('multiple3.xlsx', engine='xlsxwriter')
-
+    st.write(locale.locale_alias)
     def clean(df,i):
         df['Numéro de Jour'] = df['jour'].dt.day
-        df['Date complète'] = df['jour'].dt.strftime('%m/%d/%Y')
+        df['Date complète'] = df['jour'].dt.strftime('%d/%m/%Y')
         df['Jour de la semaine'] = df['jour'].dt.day_name()
         #df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:,4:].sum()
         df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:, 4:].sum(axis=1)    
@@ -85,6 +85,6 @@ if uploaded_file is not None:
         st.download_button(
         label="Télécharger fichier Export pif",
         data=buffer,
-        file_name="test-export",
+        file_name="test-export.xlsx",
         mime="application/vnd.ms-excel"
         )
