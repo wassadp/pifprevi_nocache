@@ -12,10 +12,7 @@ import calendar
 import locale
 from openpyxl.styles import Font
 import itertools
-from google_trans_new import google_translator
 from datetime import datetime
-import locale
-translator = google_translator()
 locale.setlocale(category=locale.LC_ALL, locale='fr_FR.utf8')
 
 
@@ -52,7 +49,6 @@ if uploaded_file is not None:
         first_column = df.pop(str(i).replace(" ", "_"))
         df.insert(0, str(i).replace(" ", "_"), first_column)
         df.pop('jour')
-        #df['Jour de la semaine'] = df['Jour de la semaine'].apply(lambda x: translator.translate(str(x)))
         df[str(i).replace(" ", "_")] = list(itertools.chain.from_iterable([key] + [float('nan')]*(len(list(val))-1) 
                             for key, val in itertools.groupby(df[str(i).replace(" ", "_")].tolist())))
 
