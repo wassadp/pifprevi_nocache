@@ -55,21 +55,10 @@ if uploaded_file is not None:
         return (calendar.day_name[born])    
 
     st.write(df)
-    site = []
-    for i in df.site.unique():
-        name = str(i).replace(" ", "_")
-        site += [name]
-        name = df.copy()
-        name = name[name['site'] == i]
-        name = df.pivot_table(values='charge', index='jour', columns=['heure'], aggfunc='first')
-        name.reset_index(inplace=True)
-        clean(name,i)
-        name.to_excel(writer, sheet_name=str(i).replace(" ", "_"), index=False)
 
-    writer.save()  
 
-    df = pd.read_excel("multiple3.xlsx")
-    st.write(df)
+
+
 
     import io
     from pyxlsb import open_workbook as open_xlsb
@@ -78,7 +67,17 @@ if uploaded_file is not None:
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         # Write each dataframe to a different worksheet.
-        df.to_excel(writer)
+        site = []
+        for i in df.site.unique():
+            name = str(i).replace(" ", "_")
+            site += [name]
+            name = df.copy()
+            name = name[name['site'] == i]
+            name = df.pivot_table(values='charge', index='jour', columns=['heure'], aggfunc='first')
+            name.reset_index(inplace=True)
+            clean(name,i)
+            name.to_excel(writer, sheet_name=str(i).replace(" ", "_"), index=False)
+
         # Close the Pandas Excel writer and output the Excel file to the buffer
         writer.save()
 
