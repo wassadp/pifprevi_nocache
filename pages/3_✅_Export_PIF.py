@@ -36,7 +36,7 @@ if uploaded_file is not None:
         #df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:,4:].sum()
         df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:, 4:].sum(axis=1)    
         g = str(i).replace(" ", "_")
-        df[str(i).replace(" ", "_")] = df['jour'].dt.month_name()
+        df[str(i).replace(" ", "_")] = df['jour'].dt.month_name(locale="fr_FR")
         first_column = df.pop('Numéro de Jour')
         df.insert(1, 'Numéro de Jour', first_column)
         first_column = df.pop('Date complète')
