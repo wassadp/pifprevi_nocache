@@ -32,11 +32,11 @@ if uploaded_file is not None:
     def clean(df,i):
         df['Numéro de Jour'] = df['jour'].dt.day
         df['Date complète'] = df['jour'].dt.strftime('%m/%d/%Y')
-        df['Jour de la semaine'] = df['jour'].dt.day_name(locale='fr_FR.UTF-8')
+        df['Jour de la semaine'] = df['jour'].dt.day_name()
         #df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:,4:].sum()
         df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:, 4:].sum(axis=1)    
         g = str(i).replace(" ", "_")
-        df[str(i).replace(" ", "_")] = df['jour'].dt.month_name(locale='fr')
+        df[str(i).replace(" ", "_")] = df['jour'].dt.month_name()
         first_column = df.pop('Numéro de Jour')
         df.insert(1, 'Numéro de Jour', first_column)
         first_column = df.pop('Date complète')
