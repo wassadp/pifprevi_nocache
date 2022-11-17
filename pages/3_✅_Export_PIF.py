@@ -13,7 +13,6 @@ import locale
 from openpyxl.styles import Font
 import itertools
 from datetime import datetime
-locale.setlocale(category=locale.LC_ALL, locale='fr_FR.utf8')
 
 
 st.title("Macro")
