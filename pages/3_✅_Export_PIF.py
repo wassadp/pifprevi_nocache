@@ -28,7 +28,7 @@ if uploaded_file is not None:
     df1 = pd.DataFrame(columns=df.columns)
     wb= Workbook()
     writer = pd.ExcelWriter('multiple3.xlsx', engine='xlsxwriter')
-    st.write(locale.locale_alias)
+
     def clean(df,i):
         df['Numéro de Jour'] = df['jour'].dt.day
         df['Date complète'] = df['jour'].dt.strftime('%d/%m/%Y')
@@ -53,11 +53,6 @@ if uploaded_file is not None:
     def findDay(date):
         born = datetime.datetime.strptime(date, '%d %m %Y').weekday()
         return (calendar.day_name[born])    
-
-    st.write(df)
-
-
-
 
 
     import io
