@@ -4,3 +4,4 @@ pyxlsb
 xlsxwriter
 numpy
 xlwt
+xlrd
