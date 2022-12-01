@@ -160,10 +160,7 @@ if uploaded_file3 is not None:
     
 
     def DISPATCH(df):
-        list_temp = []
         df_copy = df.copy()
-        k = 0
-
                     
         df_copy.loc[df_copy['aff_equal'] == True, 'Libellé terminal'] = df_copy['Affectation 1']
         df_copy.loc[df_copy['aff_equal'] == True, 'Pax LOC TOT'] = df_copy['PAX TOT'] * (1 - (df_copy['Taux de correspondance']))
@@ -226,8 +223,10 @@ if uploaded_file3 is not None:
         return df_concat
 
 
-
-    data_cies_oal_concat_1 = DISPATCH(data_cies_concat_1, df_oal)
+    df_merge = data_cies_concat_1.copy().merge(df_oal.copy(), left_on='Cie Ope', right_on='Code IATA')
+    df_merge['aff_equal'] = np.where(df_merge['Affectation 1'] == df_merge['Affectation 2']
+                     , True, False)
+    data_cies_oal_concat_1 = DISPATCH(df_merge)
     placeholder.success("OAL extraites !")        
 
 
