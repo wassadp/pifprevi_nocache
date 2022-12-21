@@ -15,8 +15,8 @@ import itertools
 from datetime import datetime
 locale.setlocale(locale.LC_ALL, "fr_FR")
 
-st.title("Macro")
-st.write("Test Macro du fichier Export_pif avant l'ajout à l'outil OUTILSPIF")
+st.title("Macro final")
+st.write("Macro du fichier Export_pif final")
 
 def findDay(date):
     born = datetime.datetime.strptime(date, '%d %m %Y').weekday()
@@ -33,7 +33,6 @@ if uploaded_file is not None:
         df['Numéro de Jour'] = df['jour'].dt.day
         df['Date complète'] = df['jour'].dt.strftime('%d/%m/%Y')
         df['Jour de la semaine'] = df['jour'].dt.day_name(locale="fr_FR")
-        #df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:,4:].sum()
         df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:, 4:].sum(axis=1)    
         g = str(i).replace(" ", "_")
         df[str(i).replace(" ", "_")] = df['jour'].dt.month_name(locale="fr_FR")
@@ -60,8 +59,7 @@ if uploaded_file is not None:
 
     import io
     from pyxlsb import open_workbook as open_xlsb
-
-    
+  
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         # Write each dataframe to a different worksheet.
@@ -75,13 +73,11 @@ if uploaded_file is not None:
             name.reset_index(inplace=True)
             clean(name,i)
             name.to_excel(writer, sheet_name=str(i).replace(" ", "_"), index=False)
-
-        # Close the Pandas Excel writer and output the Excel file to the buffer
         writer.save()
 
         st.download_button(
         label="Télécharger fichier Export pif",
         data=buffer,
-        file_name="test-export.xlsx",
+        file_name="export_pif.xlsx",
         mime="application/vnd.ms-excel"
         )

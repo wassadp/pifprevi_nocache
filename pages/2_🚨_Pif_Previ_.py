@@ -24,10 +24,13 @@ if uploaded_file is not None:
     def df():
         with st.spinner('Chargemement Programme complet ...'):
             df = pd.read_excel(uploaded_file, "pgrm_complet")
-            sat5 = ['FI', 'LO', 'A3', 'SK', 'DY', 'D8']
-            sat6 = ['LH', 'LX', 'OS', 'EW', 'SN']
-            df.loc[df['Cie Ope'].isin(sat6), 'Libellé terminal'] = 'Terminal 1_6'
-            df.loc[df['Cie Ope'].isin(sat5), 'Libellé terminal'] = 'Terminal 1_5'
+            #sat5 = ['FI', 'LO', 'A3', 'SK', 'DY', 'D8']
+            #sat6 = ['LH', 'LX', 'OS', 'EW', 'SN']
+            #df.loc[df['Cie Ope'].isin(sat6), 'Libellé terminal'] = 'Terminal 1_6'
+            #df.loc[df['Cie Ope'].isin(sat5), 'Libellé terminal'] = 'Terminal 1_5'
+            df['Libellé terminal'] = df['Libellé terminal'].str.replace("T1_Inter","Terminal 1")
+            df['Libellé terminal'] = df['Libellé terminal'].str.replace("T1_5","Terminal 1_5")
+            df['Libellé terminal'] = df['Libellé terminal'].str.replace("T1_6","Terminal 1_6")
         st.success("Programme complet chargée !")
         return df
 
@@ -35,7 +38,6 @@ if uploaded_file is not None:
     start_all = tm.time()
     l_date = pd.to_datetime(df_pgrm['Local Date'].unique().tolist()).date
     l_date = sorted(l_date)
-
     uploaded_file1 = st.file_uploader("Choisir le fichier hypotheses_repartition_correspondances.xlsx :", key=4)
     if uploaded_file1 is not None:
         @st.cache(suppress_st_warning=True,allow_output_mutation=True)
@@ -44,18 +46,15 @@ if uploaded_file is not None:
             df['plage'] = 'am'
             df.loc[df['heure_debut']>=(datetime.time(17)) , 'plage'] = 'pm'             
             return df
-
-    uploaded_file2 = st.file_uploader("Choisir le fichier nouvelles_courbes_presentation :", key=5)
-    if uploaded_file2 is not None:
-        @st.cache(suppress_st_warning=True,allow_output_mutation=True)
-        def COURBE_PRES(t):
-            df = pd.read_excel(uploaded_file2, t)             
-            return df
+    @st.cache(suppress_st_warning=True,allow_output_mutation=True)
+    def COURBE_PRES(t):
+        df = pd.read_excel('courbe_presentation.xlsx', t)             
+        return df
     col1, col2 = st.columns(2)
     with col1:
-        debut = st.date_input("Date de début :",datetime.date(2022, 10, 6), key=10)
+        debut = st.date_input("Date de début :",datetime.today().strftime('%Y-%m-%d'), key=10)
     with col2:    
-        fin = st.date_input("Date de fin :",datetime.date(2022, 10, 6), key=2)
+        fin = st.date_input("Date de fin :",datetime.today().strftime('%Y-%m-%d'), key=2)
     
     start_date = pd.to_datetime(debut)
     end_date = pd.to_datetime(fin) 
@@ -143,7 +142,7 @@ if uploaded_file is not None:
 
         
     ### DISPATCH ###       
-        def DISPATCH(df, hyp_rep):
+        def DISPATCH_NEW(df, hyp_rep):
             """Permet la création d'un DF dispatch qui facilite le tri par batterie de PIF"""
             col = ['Local Date', 'Horaire théorique', 'Prov Dest', 'A/D', 'Libellé terminal', 'K CNT', 'K CTR', 
                     'L CNT', 'L CTR', 
@@ -156,313 +155,162 @@ if uploaded_file is not None:
                     'Terminal 1',
                     'Terminal 1_5',
                     'Terminal 1_6']
-            
+
             #                IMPLEMENTATION T1
-            
+
             dispatch_df = pd.DataFrame(columns = col, index = df['Unnamed: 0'])
-            
+
             dispatch_df['Local Date'] = df['Local Date']
             dispatch_df['Horaire théorique'] = df['Horaire théorique']
             dispatch_df['Prov Dest'] = df['Prov Dest']
             dispatch_df['A/D'] = df['A/D']
             dispatch_df['Libellé terminal'] = df['Libellé terminal']
-            
-    #           variable 1ere ligne a lire : "hypothèse de répartition K vers terminal2ABCD le matin (am = matin, pm = soir cad après 17h)
-            hyp_k_abcd_am = (1 - hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])].sum()['taux'])
-            hyp_l_abcd_am = (1 - hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])].sum()['taux'])
-            hyp_m_abcd_am = (1 - hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])].sum()['taux'])
-            
-            hyp_k_abcd_pm = (1 - hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])].sum()['taux'])
-            hyp_l_abcd_pm = (1 - hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])].sum()['taux'])
-            hyp_m_abcd_pm = (1 - hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])].sum()['taux'])
-            
-            
-    #            Si une erreur de flottant survient, cela provient certainement d'ici : les valeurs ne sont pas considérées comme des flottants mais en série d'un element 
-    #            donc on les transforme en liste puis on récupère le 1er (et normalement unique élément). Contrairement aux 6 d'avant qui eux sont directement des flottants 
-    #           grace au "1 - valeur"
-    #            En cas de bug Retirez le .tolist()[0] 
-            
-        #    MATIN
-            hyp_k_k_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_k_l_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_k_m_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_k_f_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_k_g_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            
-            hyp_l_k_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_l_l_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_l_m_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_l_f_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_l_g_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            
-            hyp_m_k_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_m_l_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_m_m_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-            hyp_m_f_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
 
-    # EN "#" sont les lignes non utilisées actuellement mais fonctionnelles.
-    #                hyp_m_g_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
+        #           variable 1ere ligne a lire : "hypothèse de répartition K vers terminal2ABCD le matin (am = matin, pm = soir cad après 17h)
 
-    #                hyp_f_k_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_f_l_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_f_m_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_f_f_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_f_g_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                
-    #                hyp_g_k_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_g_l_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_g_m_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_g_f_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
-    #                hyp_g_g_am = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_debut'][0])]['taux'].tolist()[0]
+        #            Si une erreur de flottant survient, cela provient certainement d'ici : les valeurs ne sont pas considérées comme des flottants mais en série d'un element 
+        #            donc on les transforme en liste puis on récupère le 1er (et normalement unique élément). Contrairement aux 6 d'avant qui eux sont directement des flottants 
+        #           grace au "1 - valeur"
+        #            En cas de bug Retirez le .tolist()[0] 
+            def hyp_rep_salle(salle_apport, salle_emport, periode):
+                return hyp_rep.loc[(hyp_rep['salle_apport'] == salle_apport) & (hyp_rep['salle_emport'] == salle_emport) & (hyp_rep['heure_debut'] == hyp_rep[periode][0])]['taux'].tolist()[0]
+                
+            def hyp_rep_salle_abcd(salle_apport, periode):
+                return (1 - hyp_rep.loc[(hyp_rep['salle_apport'] == salle_apport) & (hyp_rep['heure_debut'] == hyp_rep[periode][0])].sum()['taux'])
             
-            
-        #    SOIR
-            hyp_k_k_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_k_l_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_k_m_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_k_f_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_k_g_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle K') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-        
-            hyp_l_k_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_l_l_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_l_m_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_l_f_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_l_g_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle L') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            
-            hyp_m_k_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_m_l_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_m_m_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-            hyp_m_f_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_m_g_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'salle M') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
+            def dispatch_term(AD, terminal, periode, type_pax = 'Pax CNT TOT', _terminal2 = None):
+                if _terminal2 == None:
+                    temp = df.loc[(df['A/D'] == AD) & (df['Libellé terminal'] == terminal)]
+                else:
+                    temp = df.loc[(df['Libellé terminal'] == terminal) | (df['Libellé terminal'] == _terminal2)]
+                    temp = temp.loc[temp['A/D'] == periode] #erreur mettre "AD" à la place de periode (à vérifier)
+                    
+                if periode == 'am':
+                    return temp.loc[(temp['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (temp['Horaire théorique'] < hyp_rep['heure_fin'][0])][type_pax]
+                elif periode == 'pm' :
+                    return temp.loc[(temp['Horaire théorique'] >= hyp_rep['heure_fin'][0])][type_pax]
+                else:
+                    return "erreur periode"
 
-    #                hyp_f_k_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_f_l_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_f_m_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_f_f_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_f_g_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2F') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
 
-    #                hyp_g_k_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'salle K') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_g_l_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'salle L') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_g_m_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'salle M') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_g_f_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'C2F') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-    #                hyp_g_g_pm = hyp_rep.loc[(hyp_rep['salle_apport'] == 'C2G') & (hyp_rep['salle_emport'] == 'C2G') & (hyp_rep['heure_debut'] == hyp_rep['heure_fin'][0])]['taux'].tolist()[0]
-
-    #            variable 1ere ligne a lire : liste des arrivées en salle K
-            l_a_k = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "EK")]
-            l_a_l = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "EL")]
-            l_a_m = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "EM")]
-    #            l_a_f = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "F")]
-    #            l_a_g = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "G")]
-            
-            
-    #                IMPLEMENTATION T1
-            l_a_t1_j = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "Terminal 1")]
-            l_a_t1_5 = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "Terminal 1_5")]
-            l_a_t1_6 = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "Terminal 1_6")]
-            
-            l_a_ac = df.loc[(df['Libellé terminal'] == "Terminal 2A") | (df['Libellé terminal'] == "Terminal 2C")]
-            l_a_ac = l_a_ac.loc[l_a_ac['A/D'] == "A"]
-            l_a_bd = df.loc[(df['Libellé terminal'] == "Terminal 2B") | (df['Libellé terminal'] == "Terminal 2D")]
-            l_a_bd = l_a_bd.loc[l_a_bd['A/D'] == "A"]
-            
-    #            l_a_t3 = df.loc[(df['A/D'] == "A") & (df['Libellé terminal'] == "Terminal 3")]
-
-    #            variable 1ere ligne a lire : liste des départs en salle K    
-            l_d_k = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "EK")]
-            l_d_l = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "EL")]
-            l_d_m = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "EM")]
-            l_d_f = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "F")]
-            l_d_g = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "G")]
-            
-    #                IMPLEMENTATION T1
-            l_d_t1_j = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "Terminal 1")]
-            l_d_t1_5 = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "Terminal 1_5")]
-            l_d_t1_6 = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "Terminal 1_6")]
-
-            l_d_ac = df.loc[(df['Libellé terminal'] == "Terminal 2A") | (df['Libellé terminal'] == "Terminal 2C")]
-            l_d_ac = l_d_ac.loc[l_d_ac['A/D'] == "D"]
-            l_d_bd = df.loc[(df['Libellé terminal'] == "Terminal 2B") | (df['Libellé terminal'] == "Terminal 2D")]
-            l_d_bd = l_d_bd.loc[l_d_bd['A/D'] == "D"]
-            l_d_t3 = df.loc[(df['A/D'] == "D") & (df['Libellé terminal'] == "Terminal 3")]
-            
-        #    K
-    #            variable 1ere ligne a lire : liste des arrivées en salle K le matin
-            l_a_k_am = l_a_k.loc[(l_a_k['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_k['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_a_k_pm = l_a_k.loc[(l_a_k['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-        #    L    
-            l_a_l_am = l_a_l.loc[(l_a_l['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_l['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_a_l_pm = l_a_l.loc[(l_a_l['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-        
-        #    M
-            l_a_m_am = l_a_m.loc[(l_a_m['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_m['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_a_m_pm = l_a_m.loc[(l_a_m['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-    #            l_a_f_am = l_a_f.loc[(l_a_f['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_f['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-    #            l_a_f_pm = l_a_f.loc[(l_a_f['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-    #            l_a_g_am = l_a_g.loc[(l_a_g['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_g['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-    #            l_a_g_pm = l_a_g.loc[(l_a_g['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-    #            l_a_ac_am = l_a_ac.loc[(l_a_ac['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_ac['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-    #            l_a_ac_pm = l_a_ac.loc[(l_a_ac['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-    #            l_a_bd_am = l_a_bd.loc[(l_a_bd['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_bd['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-    #            l_a_bd_pm = l_a_bd.loc[(l_a_bd['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-    #            l_a_t3_am = l_a_t3.loc[(l_a_t3['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_t3['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-    #            l_a_t3_pm = l_a_t3.loc[(l_a_t3['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-            
-            
-    #                IMPLEMENTATION T1
-            
-    #                Terminal 1 Jonction
-            l_a_t1_j_am = l_a_t1_j.loc[(l_a_t1_j['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_t1_j['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_a_t1_j_pm = l_a_t1_j.loc[(l_a_t1_j['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-    #                
-    ##                Terminal 1 Schengen
-            l_a_t1_5_am = l_a_t1_5.loc[(l_a_t1_5['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_t1_5['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_a_t1_5_pm = l_a_t1_5.loc[(l_a_t1_5['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-
-            l_a_t1_6_am = l_a_t1_6.loc[(l_a_t1_6['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_a_t1_6['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_a_t1_6_pm = l_a_t1_6.loc[(l_a_t1_6['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-                       
-            
-            l_d_k_am = l_d_k.loc[(l_d_k['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_k['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_k_pm = l_d_k.loc[(l_d_k['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-        #    L    
-            l_d_l_am = l_d_l.loc[(l_d_l['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_l['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_l_pm = l_d_l.loc[(l_d_l['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-        
-        #    M
-            l_d_m_am = l_d_m.loc[(l_d_m['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_m['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_m_pm = l_d_m.loc[(l_d_m['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-            l_d_f_am = l_d_f.loc[(l_d_f['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_f['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_f_pm = l_d_f.loc[(l_d_f['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-            l_d_g_am = l_d_g.loc[(l_d_g['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_g['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_g_pm = l_d_g.loc[(l_d_g['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-            l_d_ac_am = l_d_ac.loc[(l_d_ac['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_ac['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_ac_pm = l_d_ac.loc[(l_d_ac['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-            l_d_bd_am = l_d_bd.loc[(l_d_bd['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_bd['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_bd_pm = l_d_bd.loc[(l_d_bd['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-            l_d_t3_am = l_d_t3.loc[(l_d_t3['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_t3['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_t3_pm = l_d_t3.loc[(l_d_t3['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-            
-    #                IMPLEMENTATION T1
-            
-    #                Terminal 1 Jonction
-            l_d_t1_j_am = l_d_t1_j.loc[(l_d_t1_j['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_t1_j['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_t1_j_pm = l_d_t1_j.loc[(l_d_t1_j['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-    #                
-    ##                Terminal 1 Schengen
-            l_d_t1_5_am = l_d_t1_5.loc[(l_d_t1_5['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_t1_5['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_t1_5_pm = l_d_t1_5.loc[(l_d_t1_5['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-            
-            l_d_t1_6_am = l_d_t1_6.loc[(l_d_t1_6['Horaire théorique'] >= hyp_rep['heure_debut'][0]) & (l_d_t1_6['Horaire théorique'] < hyp_rep['heure_fin'][0])]   
-            l_d_t1_6_pm = l_d_t1_6.loc[(l_d_t1_6['Horaire théorique'] >= hyp_rep['heure_fin'][0])]
-                       
-            
+        #            Dans chaque colonne de dispatch on a les batteries de PIF, 
+        #           et comme on a filtré les vols de la logique des PIF dans l_a_k_am par exemple 
+        #           on le multiplie par la proportion de gens allant de K vers T2ABDC (ces PAX utilisent le K CNT), ainsi de suite pour chaque PIF
+        #           
+        #           Reduce permet ici d'additionner les sous dataframe ensembles et de combler les nan par 0. L'index est tjr celui de df_pgrm_dt, ligne de vol à vols
         #    K CNT
-    #            Dans chaque colonne de dispatch on a les batteries de PIF, 
-    #           et comme on a filtré les vols de la logique des PIF dans l_a_k_am par exemple 
-    #           on le multiplie par la proportion de gens allant de K vers T2ABDC (ces PAX utilisent le K CNT), ainsi de suite pour chaque PIF
-    #           
-    #           Reduce permet ici d'additionner les sous dataframe ensembles et de combler les nan par 0. L'index est tjr celui de df_pgrm_dt, ligne de vol à vols
-
             dispatch_df['K CNT'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_a_k_am['Pax CNT TOT'] * hyp_k_abcd_am, l_a_k_pm['Pax CNT TOT'] * hyp_k_abcd_pm, 
-                        l_a_l_am['Pax CNT TOT'] * hyp_l_abcd_am, l_a_l_pm['Pax CNT TOT'] * hyp_l_abcd_pm, 
-                        l_a_m_am['Pax CNT TOT'] * hyp_m_abcd_am, l_a_m_pm['Pax CNT TOT'] * hyp_m_abcd_pm])
-            
-            
+                        [dispatch_term('A', "EK", "am") * hyp_rep_salle_abcd('salle K', 'heure_debut'), 
+                        dispatch_term('A', "EK", "pm") * hyp_rep_salle_abcd('salle K', 'heure_fin'), 
+                        dispatch_term('A', "EL", "am") * hyp_rep_salle_abcd('salle L', 'heure_debut'), 
+                        dispatch_term('A', "EL", "pm") * hyp_rep_salle_abcd('salle L', 'heure_fin'), 
+                        dispatch_term('A', "EM", "am") * hyp_rep_salle_abcd('salle M', 'heure_debut'), 
+                        dispatch_term('A', "EM", "pm") * hyp_rep_salle_abcd('salle M', 'heure_fin')])
+
+
         #    K CTR
             dispatch_df['K CTR'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_a_k_am['Pax CNT TOT'] * hyp_k_k_am, l_a_k_pm['Pax CNT TOT'] * hyp_k_k_pm, 
-                        l_d_k_am['Pax LOC TOT'], l_d_k_pm['Pax LOC TOT'],
-                        l_a_l_am['Pax CNT TOT'] * hyp_l_k_am, l_a_l_pm['Pax CNT TOT'] * hyp_l_k_pm, 
-                        l_a_m_am['Pax CNT TOT'] * hyp_m_k_am, l_a_m_pm['Pax CNT TOT'] * hyp_m_k_pm])
-            
+                        [dispatch_term('A', "EK", "am") * hyp_rep_salle('salle K', 'salle K', 'heure_debut'),
+                        dispatch_term('A', "EK", "pm") * hyp_rep_salle('salle K', 'salle K', 'heure_fin'), 
+                        dispatch_term('D', "EK", "am", "Pax LOC TOT"), 
+                        dispatch_term('D', "EK", "pm", "Pax LOC TOT"),
+                        dispatch_term('A', "EL", "am") * hyp_rep_salle('salle L', 'salle K', 'heure_debut'),
+                        dispatch_term('A', "EL", "pm") * hyp_rep_salle('salle L', 'salle K', 'heure_fin'), 
+                        dispatch_term('A', "EM", "am") * hyp_rep_salle('salle M', 'salle K', 'heure_debut'),
+                        dispatch_term('A', "EM", "pm") * hyp_rep_salle('salle M', 'salle K', 'heure_fin')])
+
         #    L CNT
             dispatch_df['L CNT'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_a_l_am['Pax CNT TOT'] * (float(hyp_l_l_am) + float(hyp_l_f_am) + float(hyp_l_g_am)),
-                        l_a_l_pm['Pax CNT TOT'] * (float(hyp_l_l_pm) + float(hyp_l_f_pm) + float(hyp_l_g_pm))])
-        
-        
+                        [dispatch_term('A', "EL", "am") * (hyp_rep_salle('salle L', 'salle L', 'heure_debut') + 
+                                                    hyp_rep_salle('salle L', 'C2F', 'heure_debut') + 
+                                                    hyp_rep_salle('salle L', 'C2G', 'heure_debut')),
+                        dispatch_term('A', "EL", "pm") *  (hyp_rep_salle('salle L', 'salle L', 'heure_fin') + 
+                                                    hyp_rep_salle('salle L', 'C2F', 'heure_fin') + 
+                                                    hyp_rep_salle('salle L', 'C2G', 'heure_fin'))])
+
+
         #    L CTR
             dispatch_df['L CTR'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_a_k_am['Pax CNT TOT'] * hyp_k_l_am, l_a_k_pm['Pax CNT TOT'] * hyp_k_l_pm,
-                        l_d_l_am['Pax LOC TOT'], l_d_l_pm['Pax LOC TOT'],
-                        l_a_m_am['Pax CNT TOT'] * hyp_m_l_am, l_a_m_pm['Pax CNT TOT'] * hyp_m_l_pm])
-        
+                        [dispatch_term('A', "EK", "am") * hyp_rep_salle('salle K', 'salle L', 'heure_debut'),
+                        dispatch_term('A', "EK", "pm") * hyp_rep_salle('salle K', 'salle L', 'heure_fin'),
+                        dispatch_term('D', "EL", "am", 'Pax LOC TOT'), 
+                        dispatch_term('D', "EL", "pm", 'Pax LOC TOT'),
+                        dispatch_term('A', "EM", "am") * hyp_rep_salle('salle M', 'salle L', 'heure_debut'), 
+                        dispatch_term('A', "EM", "pm") * hyp_rep_salle('salle M', 'salle L', 'heure_fin')])
+
         #    M CTR
             dispatch_df['M CTR'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_a_k_am['Pax CNT TOT'] * hyp_k_m_am, l_a_k_pm['Pax CNT TOT'] * hyp_k_m_pm,
-                        l_a_l_am['Pax CNT TOT'] * hyp_l_m_am, l_a_l_pm['Pax CNT TOT'] * hyp_l_m_pm,
-                        l_a_m_am['Pax CNT TOT'] * hyp_m_l_am, l_a_m_pm['Pax CNT TOT'] * hyp_m_l_pm,
-                        l_d_m_am['Pax LOC TOT'], l_d_m_pm['Pax LOC TOT']])
-            
+                        [dispatch_term('A', "EK", "am") * hyp_rep_salle('salle K', 'salle M', 'heure_debut'),
+                        dispatch_term('A', "EK", "pm") * hyp_rep_salle('salle K', 'salle M', 'heure_fin'),
+                        dispatch_term('A', "EL", "am") * hyp_rep_salle('salle L', 'salle M', 'heure_debut'),
+                        dispatch_term('A', "EL", "pm") * hyp_rep_salle('salle L', 'salle M', 'heure_fin'),
+                        dispatch_term('A', "EM", "am") * hyp_rep_salle('salle M', 'salle M', 'heure_debut'),
+                        dispatch_term('A', "EM", "pm") * hyp_rep_salle('salle M', 'salle M', 'heure_fin'),
+                        dispatch_term('D', "EM", "am", 'Pax LOC TOT'), 
+                        dispatch_term('D', "EM", "pm", 'Pax LOC TOT')])
+
         #    Galerie EF
             dispatch_df['Galerie EF'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_a_k_am['Pax CNT TOT'] * (float(hyp_k_f_am) + float(hyp_k_g_am)),
-                        l_a_k_pm['Pax CNT TOT'] * (float(hyp_k_f_pm) + float(hyp_k_g_pm)),
-                        l_a_m_am['Pax CNT TOT'] * hyp_m_f_am, 
-                        l_a_m_pm['Pax CNT TOT'] * hyp_m_f_pm])
-            
+                        [dispatch_term('A', "EK", "am") * (hyp_rep_salle('salle K', 'C2F', 'heure_debut') + hyp_rep_salle('salle K', 'C2G', 'heure_debut')),
+                        dispatch_term('A', "EK", "pm") * (hyp_rep_salle('salle K', 'C2F', 'heure_fin') + hyp_rep_salle('salle K', 'C2G', 'heure_fin')),
+                        dispatch_term('A', "EM", "am") * hyp_rep_salle('salle M', 'C2F', 'heure_debut'), 
+                        dispatch_term('A', "EM", "pm") * hyp_rep_salle('salle M', 'C2F', 'heure_fin')])
+
         #    C2F
             dispatch_df['C2F'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_d_f_am['Pax LOC TOT'], l_d_f_pm['Pax LOC TOT']])
-            
+                        [dispatch_term('D', "F", "am", 'Pax LOC TOT'), 
+                        dispatch_term('D', "F", "pm", 'Pax LOC TOT')])
+
         #    C2G
             dispatch_df['C2G'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_d_g_am['Pax LOC TOT'], l_d_g_pm['Pax LOC TOT']])
-        
-            
+                        [dispatch_term('D', "G", "am", 'Pax LOC TOT'), 
+                        dispatch_term('D', "G", "pm", 'Pax LOC TOT')])
+
+
         #    LAC
             dispatch_df['Liaison AC'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_d_ac_am['PAX TOT'], l_d_ac_pm['PAX TOT']])
-            
-        
+                        [dispatch_term('D', "Terminal 2A", "am", "PAX TOT"), 
+                        dispatch_term('D', "Terminal 2A", "pm", 'PAX TOT'),
+                        dispatch_term('D', "Terminal 2C", "am", 'PAX TOT'),
+                        dispatch_term('D', "Terminal 2C", "pm", 'PAX TOT')])
+
+
         #    LBD
             dispatch_df['Liaison BD'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_d_bd_am['PAX TOT'], l_d_bd_pm['PAX TOT']])
-            
+                        [dispatch_term('D', "Terminal 2B", "am", 'PAX TOT'), 
+                        dispatch_term('D', "Terminal 2B", "pm", 'PAX TOT'),
+                        dispatch_term('D', "Terminal 2D", "am", 'PAX TOT'),
+                        dispatch_term('D', "Terminal 2D", "pm", 'PAX TOT')])
+
         #    T3
             dispatch_df['T3'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                        [l_d_t3_am['PAX TOT'], l_d_t3_pm['PAX TOT']])
+                        [dispatch_term('D', "Terminal 3", "am", 'PAX TOT'), 
+                        dispatch_term('D', "Terminal 3", "pm", 'PAX TOT')])
             
 
-    #                IMPLEMENTATION T1
-            
             #    Terminal 1 Jonction
             dispatch_df['Terminal 1'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                       [l_d_t1_j_am['PAX TOT'], l_d_t1_j_pm['PAX TOT']])
-                
-    #            #    Terminal 1 Schengen
-            dispatch_df['Terminal 1_5'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                       [l_d_t1_5_am['PAX TOT'], l_d_t1_5_pm['PAX TOT']])
-            dispatch_df['Terminal 1_6'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
-                       [l_d_t1_6_am['PAX TOT'], l_d_t1_6_pm['PAX TOT']])           
-        
-            dispatch_df.fillna(0, inplace=True)
-        
-            return dispatch_df
+                        [dispatch_term('D', "Terminal 1", "am", 'PAX TOT'), 
+                        dispatch_term('D', "Terminal 1", "pm", 'PAX TOT')])
+
             
-        
+            #    Terminal 1 Schengen (5 et 6)
+            dispatch_df['Terminal 1_5'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
+                        [dispatch_term('D', "Terminal 1_5", "am", 'PAX TOT'), 
+                        dispatch_term('D', "Terminal 1_5", "pm", 'PAX TOT')])
+            
+            dispatch_df['Terminal 1_6'] = reduce(lambda a, b: a.add(b, fill_value = 0), 
+                        [dispatch_term('D', "Terminal 1_6", "am", 'PAX TOT'), 
+                        dispatch_term('D', "Terminal 1_6", "pm", 'PAX TOT')])         
 
-        
+            dispatch_df.fillna(0, inplace=True)
+
+            return dispatch_df
 
  
-        dispatch = DISPATCH(df_pgrm_dt, df_hyp_rep)
+        dispatch = DISPATCH_NEW(df_pgrm_dt, df_hyp_rep)
  
-        dispatch.to_excel("dispatch.xlsx", sheet_name="dispatch")
+        #dispatch.to_excel("dispatch.xlsx", sheet_name="dispatch")
         
 
         liste_df_courbe_presentation_terminal = []
@@ -494,10 +342,10 @@ if uploaded_file is not None:
         l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[2][0], courbe(dec + 6, liste_df_courbe_presentation_terminal[2][1]))) #2E
         l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[3][0], courbe(dec, liste_df_courbe_presentation_terminal[3][1]))) #2F
         l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[4][0], courbe(dec + 4, liste_df_courbe_presentation_terminal[4][1]))) #2G
-        l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[5][0], courbe(dec + 3, liste_df_courbe_presentation_terminal[5][1]))) #T3
-        l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[5][0], courbe(dec + 3, liste_df_courbe_presentation_terminal[6][1]))) #T1 Inter
-        l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[5][0], courbe(dec + 3, liste_df_courbe_presentation_terminal[7][1]))) #T1_5
-        l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[5][0], courbe(dec + 3, liste_df_courbe_presentation_terminal[8][1]))) #T1_6
+        l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[5][0], courbe(dec, liste_df_courbe_presentation_terminal[5][1]))) #T3
+        l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[6][0], courbe(dec + 3, liste_df_courbe_presentation_terminal[6][1]))) #T1 Inter
+        l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[7][0], courbe(dec + 3, liste_df_courbe_presentation_terminal[7][1]))) #T1_5
+        l_courbe_geo_t.append((liste_df_courbe_presentation_terminal[8][0], courbe(dec + 3, liste_df_courbe_presentation_terminal[8][1]))) #T1_6
         
         #st.write(l_courbe_geo_t)
         
@@ -857,22 +705,18 @@ if uploaded_file is not None:
                 for value_index in range(len(pax_od_bd[i])):
                     df_charge['charge'][pax_od_bd[i][value_index]] += dispatch_df['Liaison BD'][pax_od_bd_i[i][value_index]]
                 
-                print(str(l_courbe_t[1][1][i][0]) + " " + str(round(100 * (i + 1) / len(pax_od_bd), 0)) +"%")
+
                 convo_bd = list(signal.convolve(df_charge['charge'].tolist(), l_courbe_t[1][1][i][1], mode='same'))
                 df_site['Liaison BD']['charge'] += convo_bd
             
             my_bar.progress(o +10)
             o += 10
             
-
-
-            print("\n8/"+str(nb_s))
             for i in range(len(pax_od_t3)):
-                df_charge = CREATE_DF_SITE(dispatch_df, "temp")
+                df_charge = CREATE_DF_SITE(dispatch_df, "temp")             
                 for value_index in range(len(pax_od_t3[i])):
                     df_charge['charge'][pax_od_t3[i][value_index]] += dispatch_df['T3'][pax_od_t3_i[i][value_index]]
-                
-                print(str(l_courbe_t[5][1][i][0]) + " " + str(round(100 * (i + 1) / len(pax_od_t3), 0)) +"%")
+            
                 convo_t3 = list(signal.convolve(df_charge['charge'].tolist(), l_courbe_t[5][1][i][1], mode='same'))
                 df_site['T3']['charge'] += convo_t3
             my_bar.progress(o +10)
@@ -924,12 +768,6 @@ if uploaded_file is not None:
             my_bar.progress(o +10)
             o += 10
             st.success('Traitement terminé !')
-            
-
-            end2 = tm.time()
-
-            #st.write('Convo')
-            #st.write(end2 - start2)  
 
             return df_site
 
@@ -954,19 +792,14 @@ if uploaded_file is not None:
         x = TO_EXCEL(EXPORT_PIF(dispatch, df_faisceaux, l_faisceaux, l_courbe_geo_t), path = directory_exp)
         end3 = tm.time()
 
-        #st.write(end3 - start_all)  
-        st.info("Export PIF créé avec succès !\nFichier accessible dans le dossier suivant :\n" + path_output
-                            + "\n\nPour lancer une nouvelle étude, lancer uniquement 'CHOISIR LES DATES'")
+        st.info("Export PIF créé avec succès !" + "\n\nPour lancer une nouvelle étude, lancer uniquement 'CHOISIR LES DATES'")
         
         import io
         from pyxlsb import open_workbook as open_xlsb
 
-        
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-            # Write each dataframe to a different worksheet.
             x.to_excel(writer, sheet_name=name_output)
-            # Close the Pandas Excel writer and output the Excel file to the buffer
             writer.save()
 
             st.download_button(
