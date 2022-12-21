@@ -26,7 +26,7 @@ st.subheader("Prévision activité AF 1 :")
 uploaded_file = st.file_uploader("Choisir un fichier :", key=1)
 if uploaded_file is not None:
     @st.cache(suppress_st_warning=True)
-    def df_af_1():
+    def previ_af():
         with st.spinner('Chargemement prévision AF 1 ...'):
             df_af_1 = pd.read_excel(uploaded_file,name_sheet_af,usecols=['A/D', 'Cie Ope', 'Num Vol', 'Porteur', 'Prov Dest', 'Affectation',
                         'Service emb/deb', 'Local Date', 'Semaine', 
@@ -35,21 +35,31 @@ if uploaded_file is not None:
         st.success("Prévision AF 1 chargée !")
         return df_af_1
     
-    df_af_1 = df_af_1()      
+    df_af_1 = previ_af()      
 
 st.subheader("Prévision activité ADP :")
 uploaded_file2 = st.file_uploader("Choisir un fichier :", key=3)
 if uploaded_file2 is not None:
-    with st.spinner('Chargemement prévision ADP ...'):
-        df_cies_1 = pd.read_excel(uploaded_file2)
-    placeholder0 = st.empty()
-    st.success("Prévisions chargées !")
+    @st.cache(suppress_st_warning=True)
+    def previ_adp():
+        with st.spinner('Chargemement prévision ADP ...'):
+            df_cies_1 = pd.read_excel(uploaded_file2)
+
+        st.success("Prévisions chargées !")
+        return df_cies_1
+
+    df_cies_1 = previ_adp
 
 st.subheader("Fichiers affectation :")
 uploaded_file3 = st.file_uploader("Choisir le fichier affectation oal :", key=4)
 if uploaded_file3 is not None:
-    df_oal = pd.read_excel(uploaded_file3, name_sheet_oal)
-    st.success('Affectation OAL chargée !')
+    @st.cache(suppress_st_warning=True)
+    def aol():
+        df_oal = pd.read_excel(uploaded_file3, name_sheet_oal)
+        st.success('Affectation OAL chargée !')
+        return df_oal
+
+    df_oal = aol()
 
 name_taux = "taux affectation previ_rea"
 
