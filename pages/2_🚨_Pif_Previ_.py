@@ -52,9 +52,9 @@ if uploaded_file is not None:
         return df
     col1, col2 = st.columns(2)
     with col1:
-        debut = st.date_input("Date de début :",datetime.datetime.today().strftime('%Y-%m-%d'), key=10)
+        debut = st.date_input("Date de début :", key=10)
     with col2:    
-        fin = st.date_input("Date de fin :",datetime.datetime.today().strftime('%Y-%m-%d'), key=2)
+        fin = st.date_input("Date de fin :", key=2)
     
     start_date = pd.to_datetime(debut)
     end_date = pd.to_datetime(fin) 
