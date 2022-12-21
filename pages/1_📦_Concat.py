@@ -235,9 +235,6 @@ if uploaded_file3 is not None:
     placeholder.info("Préparation à la concaténation des prévisions ...")
     placeholder.info("Récupération des champs vides ...")
     df_pgrm_concat = CONCAT_PGRM_AF_ADP(df_af_1, df_cies_concat_1, data_cies_oal_concat_1)
-    x = df_pgrm_concat[df_pgrm_concat['A/D']=='D']
-    y = x[x['Affectation']=='F']
-    st.write(y['Pax LOC TOT'].sum())
 
     df_pgrm_concat['Plage'] = df_pgrm_concat['Plage'].fillna(value = "P4")
 
@@ -253,18 +250,10 @@ if uploaded_file3 is not None:
     df_pgrm_concat.loc[(df_pgrm_concat['Pax LOC TOT'].isna()) , 'Pax LOC TOT'] = (df_pgrm_concat['Pax LOC TOT']*(1-0.36)).astype('int')
     df_pgrm_concat['Pax CNT TOT'] = 0
 
-    # x = df_pgrm_concat[df_pgrm_concat['A/D']=='D']
-    # y = x[x['Affectation']=='F']
-    # st.write(y['Pax LOC TOT'].sum())
-
     df_pgrm_concat.loc[df_pgrm_concat['Num Vol'] == 'MNE', 'Cie Ope'] = 'ZQ'
     df_pgrm_concat.loc[df_pgrm_concat['Pax LOC TOT'] != 0, 'Pax CNT TOT'] = df_pgrm_concat['PAX TOT'] - df_pgrm_concat['Pax LOC TOT']
     
     # à ajouter : df_pgrm_concat.dropna(inplace=True)
-
-    st.write(df_pgrm_concat['Libellé terminal'].unique())
-    st.write('######"')
-    st.write(df_pgrm_concat['Libellé terminal'].unique())
     placeholder.success("Concaténation des prévisions réussie !")
 
     ### Taux Affectation pgrm AF ###
@@ -323,6 +312,6 @@ if uploaded_file3 is not None:
         mime="application/vnd.ms-excel"
         )
     
-    st.markdown('<a href="/concat_st" target="_self">Revenir à l\'Accueil</a>', unsafe_allow_html=True)
-    st.markdown('<a href="/pi_previ" target="_self">Aller directement à l\'outils Pif prévi</a>', unsafe_allow_html=True)
+    st.markdown('<a href="/" target="_self">Revenir à l\'Accueil</a>', unsafe_allow_html=True)
+    st.markdown('<a href="/Pif_Previ_" target="_self">Aller directement à l\'outils Pif prévi</a>', unsafe_allow_html=True)
 
