@@ -48,7 +48,7 @@ if uploaded_file2 is not None:
         st.success("Prévisions chargées !")
         return df_cies_1
 
-    df_cies_1 = previ_adp
+    df_cies_1 = previ_adp()
 
 st.subheader("Fichiers affectation :")
 uploaded_file3 = st.file_uploader("Choisir le fichier affectation oal :", key=4)
