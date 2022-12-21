@@ -120,7 +120,9 @@ if uploaded_file3 is not None:
                         'Terminal 2C', 
                         'Terminal 2D', 
                         'Terminal 3',
-                        'Terminal 1']
+                        'T1_Inter',
+                        'T1_5',
+                        'T1_6']
 
     #        Afin d'utiliser GP et MP. Attention les prévi renseignent des MP en PP ce qui fausse pour la suite. 
     #        Piste d'amélioration
@@ -128,10 +130,10 @@ if uploaded_file3 is not None:
 
     ######### Traitement #########
 
-    df_cies_1["Porteur"] = df_cies_1['Porteur'].str.replace({"Gros porteur":"GP",
-                                                            "Moyen porteur":"MP",
-                                                            "Petit porteur":"MP",
-                                                            "Non renseigné":"MP"})
+    df_cies_1["Porteur"] = df_cies_1['Porteur'].str.replace("Gros porteur","GP")
+    df_cies_1["Porteur"] = df_cies_1['Porteur'].str.replace("Moyen porteur","MP")
+    df_cies_1["Porteur"] = df_cies_1['Porteur'].str.replace("Petit porteur","MP")
+    df_cies_1["Porteur"] = df_cies_1['Porteur'].str.replace("Non renseigné","MP")
 
     data_cies_concat_1 = df_cies_1[df_cies_1["Libellé terminal"] == "Terminal 2E"]
     data_cies_concat_1 = data_cies_concat_1[data_cies_concat_1["Cie Ope"].isin(df_oal["Code IATA"].tolist()) == True]
@@ -199,15 +201,13 @@ if uploaded_file3 is not None:
         else:
             st.error("Erreur dans les données : PAX (LOC + CNT) <> PAX TOT")
 
+
     # A supprimer
     def CONCAT_PGRM_AF_ADP(df_af_1, df_cies_1, df_cies_oal_1):
         L = []
         L.append(df_af_1)
         L.append(df_cies_1)
-    #            L.append(df_cies_2)
-        L.append(df_cies_oal_1)
-    #            L.append(df_cies_oal_2)
-        
+        L.append(df_cies_oal_1)       
         df_concat = pd.concat(L)
         df_concat.reset_index(inplace=True)
         del df_concat['index']
@@ -220,7 +220,6 @@ if uploaded_file3 is not None:
 
 
     VALID(data_cies_oal_concat_1, eps=0.1)
-    #        VALID(data_cies_oal_concat_2, eps=0.1)
 
     ###############################################################################
     placeholder.info("Préparation à la concaténation des prévisions ...")
