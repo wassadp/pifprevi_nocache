@@ -145,7 +145,7 @@ if uploaded_file3 is not None:
     df_cies_1["Porteur"] = df_cies_1['Porteur'].str.replace("Petit porteur","MP")
     df_cies_1["Porteur"] = df_cies_1['Porteur'].str.replace("Non renseigné","MP")
     del df_cies_1["Libellé terminal"]
-    df_cies_1 = df_cies_1.rename(columns={"Terminal_corrigé":"Libellé terminal)"})
+    df_cies_1 = df_cies_1.rename(columns={"Terminal_corrigé":"Libellé terminal"})
 
 
     data_cies_concat_1 = df_cies_1[df_cies_1["Libellé terminal"] == "Terminal 2E"]
