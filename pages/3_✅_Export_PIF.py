@@ -33,7 +33,7 @@ if uploaded_file is not None:
         df['Numéro de Jour'] = df['jour'].dt.day
         df['Date complète'] = df['jour'].dt.strftime('%d/%m/%Y')
         df['Jour de la semaine'] = df['jour'].dt.day_name(locale="fr_FR")
-        df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:, 4:].sum(axis=1)    
+        df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:, 1:145].sum(axis=1)     
         g = str(i).replace(" ", "_")
         df[str(i).replace(" ", "_")] = df['jour'].dt.month_name(locale="fr_FR")
         df["Jour férié ?"] = ""
@@ -69,7 +69,7 @@ if uploaded_file is not None:
             site += [name]
             name = df.copy()
             name = name[name['site'] == i]
-            name = df.pivot_table(values='charge', index='jour', columns=['heure'], aggfunc='first')
+            name = name.pivot_table(values='charge', index='jour', columns=['heure'], aggfunc='first')
             name.reset_index(inplace=True)
             clean(name,i)
             name.to_excel(writer, sheet_name=str(i).replace(" ", "_"), index=False)
