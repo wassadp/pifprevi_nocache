@@ -32,6 +32,7 @@ if uploaded_file is not None:
                         'Service emb/deb', 'Local Date', 'Semaine', 
                         'Jour', 'Scheduled Local Time 2', 'Plage',  
                         'Pax LOC TOT', 'Pax CNT TOT', 'PAX TOT'])
+            df_af_1.rename(columns = {'Type Avion':'Sous-type avion'}, inplace = True)
         st.success("Prévision AF 1 chargée !")
         return df_af_1
     
