@@ -28,7 +28,7 @@ if uploaded_file is not None:
     @st.cache(suppress_st_warning=True)
     def previ_af():
         with st.spinner('Chargemement prévision AF 1 ...'):
-            df_af_1 = pd.read_excel(uploaded_file,name_sheet_af,usecols=['A/D', 'Cie Ope', 'Num Vol', 'Porteur', 'Prov Dest', 'Affectation',
+            df_af_1 = pd.read_excel(uploaded_file,name_sheet_af,usecols=['A/D', 'Cie Ope', 'Num Vol', 'Porteur', 'Type Avion', 'Prov Dest', 'Affectation',
                         'Service emb/deb', 'Local Date', 'Semaine', 
                         'Jour', 'Scheduled Local Time 2', 'Plage',  
                         'Pax LOC TOT', 'Pax CNT TOT', 'PAX TOT'])
