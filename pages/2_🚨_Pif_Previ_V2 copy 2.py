@@ -289,7 +289,7 @@ if uploaded_file is not None:
         for t in list_terminaux:    
             l_courbe_geo_t[t] = courbe(liste_df_courbe_presentation_terminal[t])
         
-        st.info(st.write(l_courbe_geo_t), icon="ℹ️")
+        st.expander(l_courbe_geo_t, icon="ℹ️")
             
 
 
