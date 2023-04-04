@@ -135,7 +135,7 @@ if uploaded_file3 is not None:
                                     "Service emb/deb":"Libellé terminal",
                                     "Scheduled Local Time 2":"Horaire théorique"})
 
-    st.write(df_af_1[df_af_1["Cie Ope"] == "BR"])
+    
     #######################################################################
     terminaux_cies = ['Terminal 2A', 
                         'Terminal 2B', 
@@ -246,11 +246,10 @@ if uploaded_file3 is not None:
 
 
     data_cies_oal_concat_1 = new_DISPATCH(data_cies_concat_1, df_oal)
-    st.write(data_cies_oal_concat_1)
+
     data_cies_oal_concat_1 = data_cies_oal_concat_1[~data_cies_oal_concat_1['Libellé terminal'].str.contains('Terminal 2E')]
     placeholder.success("OAL extraites !")        
-    st.write(data_cies_oal_concat_1)
-    st.write("ff")
+
 
 
     #VALID(data_cies_oal_concat_1, eps=0.1)
@@ -263,12 +262,12 @@ if uploaded_file3 is not None:
     df_pgrm_concat['Plage'] = df_pgrm_concat['Plage'].fillna(value = "P4")
 
     z = df_pgrm_concat[df_pgrm_concat["Cie Ope"] == "BR"]
-    st.write(z)
+
     z = z.groupby(by=['A/D', 'Cie Ope', 'Local Date', 
                         'Jour (nb)', 'Semaine', 'Horaire théorique',  
                         'Sous-type avion', 'Porteur', 'Plage']).sum().reset_index()
 
-    st.write(z)
+
 
 
     #   A automatiser car ne prend pas toutes les cies en compte, ex ici c'est RC
