@@ -12,8 +12,9 @@ st.markdown("Onglet **Concat** : Un outil de concaténation des programmes AF Sk
 st.markdown("Onglet **Pif Previ** : Un outil de prévisions des flux aux différents sites de PIF dans l'aéroport CDG.")
 st.markdown("Onglet **Export PIF** : Un outil de mise en forme des réalisés PIF.")
 
-st.sidebar.info("Version : 1.0")
-with st.sidebar.expander("Version : 1.0"):
+
+with st.sidebar.expander("Version"):
+    st.sidebar.info("Version : 2.0")
     
 
 
