@@ -4,11 +4,28 @@ import numpy as np
 from datetime import date, timedelta
 from xlwt.Workbook import *
 import streamlit as st
+import altair as alt
 
 
 with open('style.css')as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html = True)
 
+seuil = {
+    'K CNT' : 300, 
+    'K CTR' : 200, 
+    'L CNT' : 300, 
+    'L CTR' : 3000, 
+    'M CTR' : 300, 
+    'Galerie EF' : 3030,
+    'C2F' : 300, 
+    'C2G' : 300, 
+    'Liaison AC' : 300, 
+    'Liaison BD' : 300, 
+    'T3' : 300,
+    'Terminal 1' : 300,
+    'Terminal 1_5' : 300,
+    'Terminal 1_6' : 300
+}
 c1, c2 = st.columns(2)
 
 uploaded_file = c1.file_uploader("Ancien code :", key=1)
@@ -185,25 +202,28 @@ if uploaded_file is not None:
                 new_courbe = new_courbe1(new_courbe)
                 real = real1(real)
 
-                import datetime
-                import time 
+                @st.cache(suppress_st_warning=True,allow_output_mutation=True)
+                def merge():
+                    start_date = pd.to_datetime(debut)
+                    end_date = pd.to_datetime(fin) 
+                    df_final = new.merge(old,on=('site','heure','jour'),  how='left')
+                    df_final = df_final.rename(columns={"charge_x":"Nouveau_code",
+                                                        "charge_y":"Ancien_code"})
+                    df_final = df_final.merge(real,on=('site','heure','jour'),  how='left')
+                    df_final = df_final.rename(columns={"charge":"real"})
+                    df_final = df_final.merge(new_courbe,on=('site','heure','jour'),  how='left')
+                    df_final = df_final.rename(columns={"charge":"Nouveau_code_affiné"})
+                    df_final.drop_duplicates(inplace=True)
 
-                
-                df_final = new.merge(old,on=('site','heure','jour'),  how='left')
-                df_final = df_final.rename(columns={"charge_x":"Nouveau_code",
-                                                    "charge_y":"Ancien_code"})
-                df_final = df_final.merge(real,on=('site','heure','jour'),  how='left')
-                df_final = df_final.rename(columns={"charge":"real"})
-                df_final = df_final.merge(new_courbe,on=('site','heure','jour'),  how='left')
-                df_final = df_final.rename(columns={"charge":"Nouveau_code_affiné"})
-                df_final.drop_duplicates(inplace=True)
 
+                    writer.save()
+                    df_final.to_excel(writer, sheet_name='Comparaison', index=False)
+                    df_final.to_excel("comparaison.xlsx", sheet_name='Comparaison', index=False)
 
-                writer.save()
-                df_final.to_excel(writer, sheet_name='Comparaison', index=False)
-                df_final.to_excel("comparaison.xlsx", sheet_name='Comparaison', index=False)
+                    return df_final
                 
-                
+                df_final = merge()
+
                 def df_final1():
                     return df_final.copy()
                 
@@ -221,6 +241,9 @@ if uploaded_file is not None:
 
                 df_final = df_final.astype({'Nouveau_code_affiné':'float64'})
                 df_final['Nouveau_code_affiné'].astype('float')
+                mask = df_final['site'].isin(seuil.keys())
+                df_final.loc[mask, 'seuil'] = df_final.loc[mask, 'site'].map(seuil)
+                st.write(df_final)
 
                 st.markdown('--------------------')
 
@@ -245,12 +268,27 @@ if uploaded_file is not None:
 
                 df = df[mask_site]
                 df_semaine = df_final[mask_site2]
+
+                st.write(df)
                 #df_semaine['Nouveau_code_affiné'] = df_semaine['Nouveau_code_affiné'].rolling(window=3).mean()                
-                df["heure_pleine"] = df["heure"].str[:2]
-                df_semaine["heure_pleine"] = df_semaine["heure"].str[:2]
-                df_heure = df.copy().groupby(['heure_pleine']).sum()
-                df_semaine_heure = df_semaine.copy().groupby(['heure_pleine']).sum()
+                df["Nouveau_code_cumul"] = df['Nouveau_code'].rolling(window=5).sum()
+                df["Ancien_code_cumul"] = df['Ancien_code'].rolling(window=5).sum()
+                df["real_cumul"] = df['real'].rolling(window=5).sum()
+                df["Nouveau_code_affiné_cumul"] = df['Nouveau_code_affiné'].rolling(window=5).sum()
+                
+
+                df.fillna(0)
+                df_semaine.fillna(0)
+                df_semaine["Nouveau_code_cumul"] = df_semaine['Nouveau_code'].rolling(window=5).sum()
+                df_semaine["Ancien_code_cumul"] = df_semaine['Ancien_code'].rolling(window=5).sum()
+                df_semaine["real_cumul"] = df_semaine['real'].rolling(window=5).sum()
+                df_semaine["Nouveau_code_affiné_cumul"] = df_semaine['Nouveau_code_affiné'].rolling(window=5).sum()
+                
+                df_heure = df.copy().groupby(['heure']).sum()
+                df_semaine_heure = df_semaine.copy().groupby(['heure']).sum()
                 df = df.groupby(['heure']).sum()
+                st.write(df)
+
 
 
 
@@ -303,13 +341,45 @@ if uploaded_file is not None:
 
                 with tab1:
 
-                    st.subheader("Tranche de 1 heure :")
-                    st.line_chart(df_heure[['Nouveau_code', 'Ancien_code', 'real', 'Nouveau_code_affiné']])
+                    st.subheader("Cumul :")
+                    df_heure = df_heure.reset_index()
+                    hover = alt.selection_single(
+                            fields=["heure"],
+                            nearest=True,
+                            on="mouseover",
+                            empty="none",
+                        )
+                    c = alt.Chart(df_heure).transform_fold(
+                        ['Nouveau_code_cumul', 'Ancien_code_cumul', 'real_cumul', 'Nouveau_code_affiné_cumul', 'seuil']
+                        ).mark_line().encode(
+                        x = alt.X('heure:O'),
+                        y = alt.Y('value:Q'),
+                        color='key:N',
+                        strokeDash=alt.condition(
+                            alt.datum.key == 'seuil',
+                            alt.value([5, 5]),  # dashed line: 5 pixels  dash + 5 pixels space
+                            alt.value([0]),  # solid line
+                        )
+                        ).add_selection(hover).interactive()
+                    st.altair_chart(c, use_container_width=True)
 
 
                 with tab2:
                     st.subheader("Tranche de 1 heure: ")
-                    st.line_chart(df_semaine_heure[['Nouveau_code', 'Ancien_code', 'real', 'Nouveau_code_affiné']])
+                    df_semaine_heure = df_semaine_heure.reset_index()
+                    c = alt.Chart(df_semaine_heure).transform_fold(
+                        ['Nouveau_code_cumul', 'Ancien_code_cumul', 'real_cumul', 'Nouveau_code_affiné_cumul', 'seuil']
+                        ).mark_line().encode(
+                        x = alt.X('heure:O'),
+                        y = alt.Y('value:Q'),
+                        color='key:N',
+                        strokeDash=alt.condition(
+                            alt.datum.key == 'seuil',
+                            alt.value([5, 5]),  # dashed line: 5 pixels  dash + 5 pixels space
+                            alt.value([0]),  # solid line
+                        )
+                        )
+                    st.altair_chart(c, use_container_width=True)
 
 
                 directory_exp = "export_comparaison_du_" + str(start_date.date()) + "_au_" + str(end_date.date()) + ".xlsx"
