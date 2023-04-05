@@ -1,9 +1,6 @@
 from datetime import datetime
-from tkinter.ttk import Separator
-from unicodedata import numeric
 import pandas as pd 
 import numpy as np
-import time
 from datetime import date, timedelta
 from xlwt.Workbook import *
 import streamlit as st
