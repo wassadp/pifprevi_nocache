@@ -10,21 +10,22 @@ import altair as alt
 with open('style.css')as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html = True)
 
+st.title('Dashboard Comparaison')
 seuil = {
     'K CNT' : 300, 
-    'K CTR' : 200, 
-    'L CNT' : 300, 
-    'L CTR' : 3000, 
-    'M CTR' : 300, 
-    'Galerie EF' : 3030,
-    'C2F' : 300, 
+    'K CTR' : 1600, 
+    'L CNT' : 1440, 
+    'L CTR' : 1170, 
+    'M CTR' : 1820, 
+    'Galerie EF' : 1820,
+    'C2F' : 2180, 
     'C2G' : 300, 
-    'Liaison AC' : 300, 
-    'Liaison BD' : 300, 
-    'T3' : 300,
-    'Terminal 1' : 300,
-    'Terminal 1_5' : 300,
-    'Terminal 1_6' : 300
+    'Liaison AC' : 1960, 
+    'Liaison BD' : 2500, 
+    'T3' : 1260,
+    'Terminal 1' : 2280,
+    'Terminal 1_5' : 375,
+    'Terminal 1_6' : 500
 }
 c1, c2 = st.columns(2)
 
@@ -229,21 +230,21 @@ if uploaded_file is not None:
                 
                 df_final = df_final1()
                 df_comp = df_final1()
-                st.title('Dashboard Comparaison')
-
-                st.header("Cumul PIFs confondues")
+                
+                st.markdown('--------------------')
+                st.subheader("Cumul PIFs confondues")
                 col1, col2, col3, col4 = st.columns(4)
                 col1.metric(label = "Ancien code",value = str(round(sum(old.charge))))
-                col2.metric(label = "Nouveau code",value = str(round(sum(new.charge))))
-                col3.metric(label = "Nouveau code affiné",value = str(round(sum(new_courbe.charge))))
-                col4.metric(label = "Réalisé",value = str(round(sum(real.charge))))
+                col2.metric(label = "Nouveau code",value = str(round(sum(new.charge))), delta=str(round(0 - (sum(old.charge) - sum(new.charge)))))
+                col3.metric(label = "Nouveau code affiné",value = str(round(sum(new_courbe.charge))), delta=str(round(0 - (sum(old.charge) - sum(new_courbe.charge)))))
+                col4.metric(label = "Réalisé",value = str(round(sum(real.charge))), delta=str(round(0 - (sum(old.charge) - sum(real.charge)))))
 
 
                 df_final = df_final.astype({'Nouveau_code_affiné':'float64'})
                 df_final['Nouveau_code_affiné'].astype('float')
                 mask = df_final['site'].isin(seuil.keys())
                 df_final.loc[mask, 'seuil'] = df_final.loc[mask, 'site'].map(seuil)
-                st.write(df_final)
+                
 
                 st.markdown('--------------------')
 
@@ -269,7 +270,7 @@ if uploaded_file is not None:
                 df = df[mask_site]
                 df_semaine = df_final[mask_site2]
 
-                st.write(df)
+                
                 #df_semaine['Nouveau_code_affiné'] = df_semaine['Nouveau_code_affiné'].rolling(window=3).mean()                
                 df["Nouveau_code_cumul"] = df['Nouveau_code'].rolling(window=5).sum()
                 df["Ancien_code_cumul"] = df['Ancien_code'].rolling(window=5).sum()
@@ -287,18 +288,16 @@ if uploaded_file is not None:
                 df_heure = df.copy().groupby(['heure']).sum()
                 df_semaine_heure = df_semaine.copy().groupby(['heure']).sum()
                 df = df.groupby(['heure']).sum()
-                st.write(df)
-
-
 
 
                 tab1, tab2 = st.tabs(["Jour", "10 jours"])
 
                 with tab1:
-                    st.subheader("Tranche de 10 min :")
+                    st.subheader("Tranche de 10 min")
                     #st.subheader("Vue du " + str(date.astype('datetime64[D]')) + ":")
                     st.line_chart(df[['Nouveau_code', 'Ancien_code', 'real', 'Nouveau_code_affiné']])
 
+                    st.subheader("KPI")
                     col1, col2, col3, col4 = st.columns(4)
                     with col1:
                         Charge_tot_old = round(df['Ancien_code'].sum())
@@ -317,7 +316,7 @@ if uploaded_file is not None:
 
                 with tab2:
 
-                    st.subheader("Tranche de 10 min :")
+                    st.subheader("Tranche de 10 min")
                     df_semaine = df_semaine.groupby(['heure']).sum()
                     st.line_chart(df_semaine[['Nouveau_code', 'Ancien_code', 'real', 'Nouveau_code_affiné']])
 
@@ -341,7 +340,7 @@ if uploaded_file is not None:
 
                 with tab1:
 
-                    st.subheader("Cumul :")
+                    st.subheader("Cumul")
                     df_heure = df_heure.reset_index()
                     hover = alt.selection_single(
                             fields=["heure"],
@@ -365,7 +364,7 @@ if uploaded_file is not None:
 
 
                 with tab2:
-                    st.subheader("Tranche de 1 heure: ")
+                    st.subheader("Cumul")
                     df_semaine_heure = df_semaine_heure.reset_index()
                     c = alt.Chart(df_semaine_heure).transform_fold(
                         ['Nouveau_code_cumul', 'Ancien_code_cumul', 'real_cumul', 'Nouveau_code_affiné_cumul', 'seuil']

@@ -16,3 +16,8 @@ div.css-12w0qpk.e1tzin5v2{
    div.css-50ug3q.e16fv1kl3{
     font-weight: 700;
    }
+button[data-baseweb="tab"] > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 24px;
+    padding: 20px 20px 20px 20px;
+
+  }
