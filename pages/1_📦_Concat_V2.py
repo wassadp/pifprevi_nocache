@@ -261,15 +261,6 @@ if uploaded_file3 is not None:
 
     df_pgrm_concat['Plage'] = df_pgrm_concat['Plage'].fillna(value = "P4")
 
-    z = df_pgrm_concat[df_pgrm_concat["Cie Ope"] == "BR"]
-
-    z = z.groupby(by=['A/D', 'Cie Ope', 'Local Date', 
-                        'Jour (nb)', 'Semaine', 'Horaire théorique',  
-                        'Sous-type avion', 'Porteur', 'Plage']).sum().reset_index()
-
-
-
-
     #   A automatiser car ne prend pas toutes les cies en compte, ex ici c'est RC
     df_pgrm_concat = df_pgrm_concat.dropna(subset=['Pax LOC TOT'])
 
