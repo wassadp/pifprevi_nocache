@@ -24,7 +24,8 @@ if uploaded_file is not None:
     def df():
         with st.spinner('Chargemement Programme complet ...'):
             df = pd.read_excel(uploaded_file, "pgrm_complet")
-            sat5 = ['FI', 'LO', 'A3', 'SK', 'DY', 'D8', 'S4']
+            # ajouter filtre T1
+            sat5 = ['FI', 'LO', 'A3', 'SK', 'S4']
             sat6 = ['LH', 'LX', 'OS', 'EW', 'GQ', 'SN']
             df.loc[df['Cie Ope'].isin(sat6), 'Libellé terminal'] = 'Terminal 1_6'
             df.loc[df['Cie Ope'].isin(sat5), 'Libellé terminal'] = 'Terminal 1_5'
@@ -45,7 +46,7 @@ if uploaded_file is not None:
         def get_pif_in_fichier_config(pif):
             return pd.read_excel(uploaded_file_config, sheet_name=pif)
     
-    # a définir en fonction du fichier de congig
+    # a définir en fonction du fichier de config
 
     L_pif = ['K CNT', 'K CTR', 
                     'L CNT', 'L CTR', 
@@ -58,6 +59,7 @@ if uploaded_file is not None:
                     'Terminal 1',
                     'Terminal 1_5',
                     'Terminal 1_6']
+    
     table_faisceau_iata = pd.read_excel("table_faisceau_IATA.xlsx")
     table_faisceau_iata = table_faisceau_iata[['Prov Dest','Faisceau géographique']]
     df_pgrm = df_pgrm.merge(table_faisceau_iata,how='left', left_on='Prov Dest', right_on='Prov Dest')
@@ -259,10 +261,6 @@ if uploaded_file is not None:
             dispatch_df.fillna(0, inplace=True)
 
             return dispatch_df
-
-
-
-
 
 
         dispatch = DISPATCH_NEW(df_pgrm_dt)
