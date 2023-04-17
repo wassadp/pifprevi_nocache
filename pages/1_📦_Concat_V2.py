@@ -141,6 +141,8 @@ if uploaded_file2 is not None:
 
 
 
+
+
     #   A automatiser car ne prend pas toutes les cies en compte, ex ici c'est RC
     df_pgrm_concat = df_pgrm_concat.dropna(subset=['Pax LOC TOT'])
 
