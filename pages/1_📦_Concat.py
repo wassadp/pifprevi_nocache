@@ -36,7 +36,7 @@ if uploaded_file is not None:
         st.success("Prévision AF 1 chargée !")
         return df_af_1
     
-    df_af_1 = previ_af()      
+    df_af_1 = previ_af()
 
 st.subheader("Prévision activité ADP :")
 uploaded_file2 = st.file_uploader("Choisir un fichier :", key=3)
@@ -124,7 +124,7 @@ if uploaded_file3 is not None:
                                     "Service emb/deb":"Libellé terminal",
                                     "Scheduled Local Time 2":"Horaire théorique"})
 
-
+    st.write(df_af_1[df_af_1["Cie Ope"] == "BR"])
     #######################################################################
     terminaux_cies = ['Terminal 2A', 
                         'Terminal 2B', 
@@ -148,9 +148,8 @@ if uploaded_file3 is not None:
     del df_cies_1["Libellé terminal"]
     df_cies_1 = df_cies_1.rename(columns={"Terminal_corrigé":"Libellé terminal"})
 
-
     data_cies_concat_1 = df_cies_1[df_cies_1["Libellé terminal"] == "Terminal 2E"]
-    data_cies_concat_1 = data_cies_concat_1[data_cies_concat_1["Cie Ope"].isin(df_oal["Code IATA"].tolist()) == True]
+    #data_cies_concat_1 = data_cies_concat_1[data_cies_concat_1["Cie Ope"].isin(df_oal["Code IATA"].tolist()) == True]
     data_cies_concat_1.reset_index(inplace=True)
     del data_cies_concat_1['index']
     df_cies_concat_1 = df_cies_1[df_cies_1["Libellé terminal"].isin(terminaux_cies) == True]
@@ -193,12 +192,12 @@ if uploaded_file3 is not None:
     #                            Vérifier si affectation 1 est bien dans les libellés terminaux (EK, EL, EM)
                         st.error('Erreur dans Affectation OAL : affectation 1 ou 2 invalides !', k)
         
-        df_temp = pd.concat(list_temp)
-        df_oal_concat = pd.concat([df_copy, df_temp])   
-        df_oal_concat.reset_index(inplace=True)
-        del df_oal_concat['index']    
+        #df_temp = pd.concat(list_temp)
+        #df_oal_concat = pd.concat([df_copy, df_temp])   
+        #df_oal_concat.reset_index(inplace=True)
+        #del df_oal_concat['index']    
         
-        return df_oal_concat
+        return df
 
 
     # pytest possible ?
@@ -211,7 +210,7 @@ if uploaded_file3 is not None:
             else:
                 st.error('pas bon', df.loc[i, 'Cie Ope'], 'index :', i)
         if cpt == df.shape[0]:
-            placeholder.info("Données valides")
+            st.success("Données valides")
         else:
             st.error("Erreur dans les données : PAX (LOC + CNT) <> PAX TOT")
 
@@ -233,7 +232,7 @@ if uploaded_file3 is not None:
     placeholder.success("OAL extraites !")        
 
 
-    VALID(data_cies_oal_concat_1, eps=0.1)
+    #VALID(data_cies_oal_concat_1, eps=0.1)
 
     ###############################################################################
     placeholder.info("Préparation à la concaténation des prévisions ...")
@@ -241,6 +240,14 @@ if uploaded_file3 is not None:
     df_pgrm_concat = CONCAT_PGRM_AF_ADP(df_af_1, df_cies_concat_1, data_cies_oal_concat_1)
 
     df_pgrm_concat['Plage'] = df_pgrm_concat['Plage'].fillna(value = "P4")
+
+    z = df_pgrm_concat[df_pgrm_concat["Cie Ope"] == "BR"]
+    st.write(z)
+    z = z.groupby(by=['A/D', 'Cie Ope', 'Local Date', 
+                        'Jour (nb)', 'Semaine', 'Horaire théorique',  
+                        'Sous-type avion', 'Porteur', 'Plage']).sum().reset_index()
+
+    st.write(z)
 
 
     #   A automatiser car ne prend pas toutes les cies en compte, ex ici c'est RC
