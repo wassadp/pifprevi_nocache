@@ -25,7 +25,7 @@ if uploaded_file is not None:
         with st.spinner('Chargemement Programme complet ...'):
             df = pd.read_excel(uploaded_file, "pgrm_complet")
             # ajouter filtre T1
-            sat5 = ['FI', 'LO','A3', 'SK', 'S4']
+            sat5 = ['FI', 'LO', 'A3', 'SK', 'S4']
             sat6 = ['LH', 'LX', 'OS', 'EW', 'GQ', 'SN']
             df.loc[df['Cie Ope'].isin(sat6), 'Libellé terminal'] = 'Terminal 1_6'
             df.loc[df['Cie Ope'].isin(sat5), 'Libellé terminal'] = 'Terminal 1_5'
@@ -46,7 +46,7 @@ if uploaded_file is not None:
         def get_pif_in_fichier_config(pif):
             return pd.read_excel(uploaded_file_config, sheet_name=pif)
     
-    # a définir en fonction du fichier de config
+    # a définir en fonction du fichier de congig
 
     L_pif = ['K CNT', 'K CTR', 
                     'L CNT', 'L CTR', 
@@ -70,21 +70,9 @@ if uploaded_file is not None:
 
     @st.cache(suppress_st_warning=True,allow_output_mutation=True)
     def COURBE_PRES(t):
-        df = pd.read_excel('courbes_presentation.xlsx', t)   
-    #     L=[]
-    #     if t == 'T2E':
-    #         for i in ['Amérique Centre + Sud', 'Amérique Nord', 'Autre Afrique',
-    #    'Autre Europe', 'DOM TOM', 'Extrême Orient', 'Moyen Orient',
-    #    'Métropole', 'Schengen', 'U.E. hors M & S']:
-    #             i = df[df['faisceau_geographique']==i].copy()
-    #             st.write(i)
-    #             i['pourc'] = i['pourc'].shift(2)
-    #             i['pourc'] = i['pourc'].fillna(0)
-    #             L += [i]
-    #         dff = pd.concat(L)               
-    #         return dff
-    #     else:
-    #         return df 
+        x=78
+        df = pd.read_excel('courbes_presentation_V5.xlsx', t)
+
         return df       
     col1, col2 = st.columns(2)
     with col1:
@@ -120,6 +108,10 @@ if uploaded_file is not None:
         path_courbes_term = r"" + "nouvelles_courbes_presentation_PIF.xlsx"
         list_terminaux = ['Terminal 2A', 'Terminal 2B', 'Terminal 2C', 'Terminal 2D',
                           'EK', 'EL', 'EM', 'F', 'G', 'Terminal 3','Terminal 1',
+                          'Terminal 1_5','Terminal 1_6']
+        
+        list_terminaux_P4 = ['Terminal 2A', 'Terminal 2B', 'Terminal 2C', 'Terminal 2D',
+                           'Terminal 3','Terminal 1',
                           'Terminal 1_5','Terminal 1_6']
         
         path_output = r"" + "output_export_pif"
@@ -175,7 +167,7 @@ if uploaded_file is not None:
         df_pgrm_dt['Unnamed: 0'] = df_pgrm_dt.index
         
     
-
+        
         faisceaux = ['Métropole', 'Schengen', 'U.E. hors M & S', 'Afrique du Nord',
        'Amérique du Nord', 'Autre Afrique', 'Autre Europe', 'DOM TOM',
        'Extrême Orient', 'Moyen Orient', 'Amérique Centre + Sud']
@@ -188,9 +180,6 @@ if uploaded_file is not None:
         def HYP_REP(sheet):
             df = pd.read_excel(uploaded_file1, sheet)
             df['heure'] = pd.to_datetime(df['heure'].str[:8],format='%H.%M.%S')
-            # df['heure_heure'] = df['heure'].str[:9]
-            # df['heure_heure'] = pd.to_datetime(df['heure_heure'], format='%H', exact=False)
-            # df['heure_heure'] = df.heure_heure.apply(lambda x: x.hour)
             return df
 
         df_pgrm_dt['Horaire théorique'] = pd.to_datetime(df_pgrm_dt['Horaire théorique'],format='%H:%M:%S')
@@ -214,13 +203,27 @@ if uploaded_file is not None:
 
             dispatch_df = pd.DataFrame(columns = col, index = df['Unnamed: 0'])
 
+            
+
             dispatch_df['Local Date'] = df['Local Date']
             dispatch_df['Horaire théorique'] = df['Horaire théorique']
             dispatch_df['Prov Dest'] = df['Prov Dest']
             dispatch_df['A/D'] = df['A/D']
             dispatch_df['Libellé terminal'] = df['Libellé terminal']
             dispatch_df['Faisceau géographique'] = df['Faisceau géographique']
+            dispatch_df['Plage'] = df['Plage']
+            dispatch_df['Pax LOC TOT'] = df['Pax LOC TOT']
+            dispatch_df['Pax CNT TOT'] = df['Pax CNT TOT']
+            dispatch_df['PAX TOT'] = df['PAX TOT']
+            dispatch_df['Affectation'] = df['Affectation']
+            dispatch_df['TOT_théorique'] = 0
+
+            dispatch_df.loc[(dispatch_df['A/D'] == 'A') & (dispatch_df['Affectation'].isin(['E', 'F', 'G'])), 'TOT_théorique'] = dispatch_df['Pax CNT TOT']
+            dispatch_df.loc[(dispatch_df['A/D'] == 'D') & (~dispatch_df['Affectation'].isin(['E', 'F', 'G'])), 'TOT_théorique'] = dispatch_df['PAX TOT']
+            dispatch_df.loc[(dispatch_df['A/D'] == 'D') & (dispatch_df['Affectation'].isin(['E', 'F', 'G'])), 'TOT_théorique'] = dispatch_df['Pax LOC TOT']
+
             
+
             def dispatch_term(terminal, salle_apport, salle_emport, AD):
                 hyp_rep = HYP_REP(salle_apport + "_" + salle_emport)
                 
@@ -234,7 +237,8 @@ if uploaded_file is not None:
                             temp = df.loc[(df['A/D'] == AD) & (df['Libellé terminal'] == terminal)].copy()
                             temp = temp.loc[(df['Faisceau géographique'] == j)]
                             temp = temp.loc[(temp['Horaire théorique'] >= i) & (temp['Horaire théorique'] < n) ]['Pax CNT TOT']*x
-                                     
+                    
+                        
                             L_df += [temp]
                 return reduce(lambda a, b: a.add(b, fill_value = 0),L_df)
 
@@ -261,37 +265,37 @@ if uploaded_file is not None:
 
             dispatch_df.fillna(0, inplace=True)
 
-            return dispatch_df
+            dispatch_df['TOT_calcul'] = dispatch_df[L_pif].sum(axis=1)
 
+
+            for i in L_pif:
+                dispatch_df[i] = dispatch_df[i] / dispatch_df['TOT_calcul']*dispatch_df['TOT_théorique']
+
+            dispatch_df.fillna(0, inplace=True)
+            return dispatch_df    
 
         dispatch = DISPATCH_NEW(df_pgrm_dt)
 
         dispatch.to_excel("dispatch.xlsx", sheet_name="dispatch")
         
-
-        liste_df_courbe_presentation_terminal = {}
+        
+        l_courbe_geo_t = {}
         
         for t in list_terminaux:
-            liste_df_courbe_presentation_terminal[t] = COURBE_PRES(t)
-        
-        def courbe(df_c):
-            l_f = df_c['faisceau_geographique'].unique().tolist()
-            
-            courbe = {}
-            for i in l_f:    
-                courbe[i] = ( df_c['pourc'].loc[(df_c['faisceau_geographique'] == i)
-                                                & (df_c['heure_debut'] == df_c['heure_debut'][0])].tolist())
-            return courbe
-
-        l_courbe_geo_t = {}
-
-        for t in list_terminaux:    
-            l_courbe_geo_t[t] = courbe(liste_df_courbe_presentation_terminal[t])
-        
-        with st.expander("Debug"):
-            st.write(l_courbe_geo_t)
-
-            
+            df_courbe = COURBE_PRES(t).copy()
+            l_courbe_geo_t[t] = {}
+            for i in df_courbe["faisceau_geographique"].unique():
+                temp = df_courbe.copy()
+                temp = temp[temp["faisceau_geographique"].copy()==i].copy()
+                l_courbe_geo_t[t][i] = {}
+                for j in ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P0"]:
+                    l_courbe_geo_t[t][i][j] = {}
+                    # st.write(df_courbe)
+                    # st.write(t)
+                    # st.write(l_courbe_geo_t[t][i][j])
+                    l_courbe_geo_t[t][i][j] = temp[j].tolist()
+                    
+    
 
 
         global pb_index
@@ -300,21 +304,32 @@ if uploaded_file is not None:
 
         dispatch_paf = dispatch.copy()
 
+
+
         dispatch_paf['new_date'] = dispatch_paf['Local Date'].dt.date
         dispatch_paf['new_time'] = dispatch_paf['Horaire théorique'].dt.time
         dispatch_paf['new_datetime'] = pd.to_datetime(dispatch_paf['new_date'].astype(str) + ' ' + dispatch_paf['new_time'].astype(str))
+
+        dispatch_paf.loc[(dispatch_paf['Libellé terminal'].isin(list_terminaux_P4)) & (dispatch_paf['Horaire théorique']>datetime(1900, 1, 1, 0, 00, 00, 0)), 'Plage'] = 'P2'
+        dispatch_paf.loc[(dispatch_paf['Libellé terminal'].isin(list_terminaux_P4)) & (dispatch_paf['Horaire théorique']>datetime(1900, 1, 1, 11, 00, 00, 0)), 'Plage'] = 'P4'
+        dispatch_paf.loc[(dispatch_paf['Libellé terminal'].isin(list_terminaux_P4)) & (dispatch_paf['Horaire théorique']>datetime(1900, 1, 1, 15, 00, 00, 0)), 'Plage'] = 'P5'
+        dispatch_paf.loc[(dispatch_paf['Libellé terminal'].isin(list_terminaux_P4)) & (dispatch_paf['Horaire théorique']>datetime(1900, 1, 1, 17, 00, 00, 0)), 'Plage'] = 'P6'
+        dispatch_paf.loc[(dispatch_paf['Libellé terminal'].isin(list_terminaux_P4)) & (dispatch_paf['Horaire théorique']>datetime(1900, 1, 1, 19, 00, 00, 0)), 'Plage'] = 'P7'
+
+
 
         dispatch_paf_D = dispatch_paf.copy()
         dispatch_paf_D = dispatch_paf_D[dispatch_paf_D["A/D"] == "D"]
         dispatch_paf_A = dispatch_paf.copy()
         dispatch_paf_A = dispatch_paf_A[dispatch_paf_A["A/D"] == "A"]
 
+
         n_D = 24
-        n_A = 5 #len(L_A)
+        n_A = 4 #len(L_A)
 
         # Create a list to store the duplicated rows
         rows = []
-        L_A = [0, 0, 0, 0.5, 0.5]
+        L_A = [0, 0, 0.5, 0.5]
         L_pif = ['K CNT', 'K CTR', 
                     'L CNT', 'L CTR', 
                     'M CTR', 
@@ -328,8 +343,17 @@ if uploaded_file is not None:
                     'Terminal 1_6']
 
 
-        # DEPART
 
+        # st.write(dispatch_paf_D)
+        # dispatch_paf_D['Libellé terminal'].replace({"F":"C2F",
+        #                                             "G":"C2G",
+        #                                             "EM":"M CTR",
+        #                                             "EL":"L CTR",
+        #                                             "EK":"K CTR",},
+        #                                               inplace=True)
+        
+        
+        # DEPART
         # Loop through each row in the dataframe
         for index, row in dispatch_paf_D.iterrows():
             # Loop n times to duplicate the row and subtract 10 minutes from the datetime column each time
@@ -339,12 +363,13 @@ if uploaded_file is not None:
                 if new_row['Faisceau géographique'] == 0:
                     x = "Extrême Orient"
                 else:
-                    x = new_row['Faisceau géographique']       
-                L = l_courbe_geo_t[new_row['Libellé terminal']][x]
+                    x = new_row['Faisceau géographique']    
+                L = l_courbe_geo_t[new_row['Libellé terminal']][x][new_row['Plage']]               
                 # Subtract 10 minutes from the datetime column
                 new_row['new_datetime'] -= timedelta(minutes=10*i)
                 for pif in L_pif:
                     new_row[pif] = L[i]*new_row[pif]
+                
                 # Append the modified row to the list
                 rows.append(new_row)
                 
@@ -364,12 +389,15 @@ if uploaded_file is not None:
                 new_row['new_datetime'] += timedelta(minutes=10*i)
                 for pif in L_pif:
                     new_row[pif] = L_A[i]*new_row[pif]
+                
                 # Append the modified row to the list
                 rows.append(new_row)
                 
                 
         # Create a new dataframe from the list of duplicated rows
         new_df_A = pd.DataFrame(rows)
+
+        
 
         new_df_A['Local Date'] = new_df_A['new_datetime'].dt.date
         new_df_A['Horaire théorique'] = new_df_A['new_datetime'].dt.time
@@ -389,6 +417,16 @@ if uploaded_file is not None:
                          'Horaire théorique':'heure',
                          'variable':'site',
                          'value':'charge'}, inplace=True)
+
+
+        import time
+        def CLEAN_TIME(m):
+            t = '0:00'.join(str(m).rsplit('5:00', 1))
+            #l = [int(k) for k in t.split(':')]
+            time_r = time(hour = int(t[11:13]), minute = int(t[14:16]), second = int(t[17:19]))
+
+            return time_r
+        
 
 
         directory_exp = "export_pif_du_" + str(start_date.date()) + "_au_" + str(end_date.date()) + ".xlsx"
