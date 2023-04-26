@@ -6,7 +6,7 @@ from functools import reduce
 import time as tm
 import openpyxl
    
-st.set_page_config(page_title="Pif Previ V2", page_icon="🚨", layout="centered", initial_sidebar_state="auto", menu_items=None)
+st.set_page_config(page_title="Pif Previ", page_icon="🚨", layout="centered", initial_sidebar_state="auto", menu_items=None)
 
 hide_streamlit_style = """
             <style>
@@ -16,7 +16,7 @@ hide_streamlit_style = """
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
-st.title('New_hyp')
+st.title('Pif Prévi')
 st.subheader("Programme complet :")
 uploaded_file = st.file_uploader("Choisir un fichier :", key=1)
 if uploaded_file is not None:
