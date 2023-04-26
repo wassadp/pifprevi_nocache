@@ -156,7 +156,10 @@ if uploaded_file2 is not None:
 
     df_pgrm_concat.loc[df_pgrm_concat['Num Vol'] == 'MNE', 'Cie Ope'] = 'ZQ'
     df_pgrm_concat.loc[df_pgrm_concat['Pax LOC TOT'] != 0, 'Pax CNT TOT'] = df_pgrm_concat['PAX TOT'] - df_pgrm_concat['Pax LOC TOT']
-    
+    sat5 = ['FI', 'LO', 'A3', 'SK', 'S4']
+    sat6 = ['LH', 'LX', 'OS', 'EW', 'GQ', 'SN']
+    df_pgrm_concat.loc[df_pgrm_concat['Cie Ope'].isin(sat6), 'Libellé terminal'] = 'Terminal 1_6'
+    df_pgrm_concat.loc[df_pgrm_concat['Cie Ope'].isin(sat5), 'Libellé terminal'] = 'Terminal 1_5'
     # à ajouter : df_pgrm_concat.dropna(inplace=True)
     placeholder.success("Concaténation des prévisions réussie !")
 

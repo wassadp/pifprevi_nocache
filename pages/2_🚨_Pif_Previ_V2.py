@@ -25,10 +25,6 @@ if uploaded_file is not None:
         with st.spinner('Chargemement Programme complet ...'):
             df = pd.read_excel(uploaded_file, "pgrm_complet")
             # ajouter filtre T1
-            sat5 = ['FI', 'LO', 'A3', 'SK', 'S4']
-            sat6 = ['LH', 'LX', 'OS', 'EW', 'GQ', 'SN']
-            df.loc[df['Cie Ope'].isin(sat6), 'Libellé terminal'] = 'Terminal 1_6'
-            df.loc[df['Cie Ope'].isin(sat5), 'Libellé terminal'] = 'Terminal 1_5'
             df['Libellé terminal'] = df['Libellé terminal'].str.replace("T1_Inter","Terminal 1")
             df['Libellé terminal'] = df['Libellé terminal'].str.replace("T1_5","Terminal 1_5")
             df['Libellé terminal'] = df['Libellé terminal'].str.replace("T1_6","Terminal 1_6")
