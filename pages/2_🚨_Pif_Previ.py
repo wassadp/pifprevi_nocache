@@ -426,14 +426,14 @@ if uploaded_file is not None:
 
 
         directory_exp = "export_pif_du_" + str(start_date.date()) + "_au_" + str(end_date.date()) + ".xlsx"
-        from io import BytesIO
+        from io import BytesIO  
         from pyxlsb import open_workbook as open_xlsb
 
         def download_excel(df):
             output = BytesIO()
             writer = pd.ExcelWriter(output, engine='xlsxwriter')
             df.to_excel(writer, sheet_name=name_output, index=False)
-            writer.save()
+            writer.close()
             processed_data = output.getvalue()
             return processed_data
         
