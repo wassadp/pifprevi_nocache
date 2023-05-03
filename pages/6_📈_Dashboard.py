@@ -39,20 +39,20 @@ if uploaded_file is not None:
     if uploaded_file1 is not None:
         @st.cache(suppress_st_warning=True,allow_output_mutation=True)
         def neww():
-            return pd.read_excel(uploaded_file1)
+            return pd.read_excel(uploaded_file1, engine='openpyxl')
         new = neww()
         c3, c4 = st.columns(2)
         uploaded_file2 = c3.file_uploader("Nouveau code affiné :", key=3)    
         if uploaded_file2 is not None:
             @st.cache(suppress_st_warning=True,allow_output_mutation=True)
             def new_courbee():
-                return pd.read_excel(uploaded_file2)
+                return pd.read_excel(uploaded_file2, engine='openpyxl')
             new_courbe = new_courbee()
             uploaded_file3 = c4.file_uploader("Réalisé :", key=4)
             if uploaded_file3 is not None:
                 @st.cache(suppress_st_warning=True,allow_output_mutation=True)
                 def reall():
-                    return pd.read_excel(uploaded_file3, skiprows=3)
+                    return pd.read_excel(uploaded_file3, engine='openpyxl', skiprows=3)
                 real = reall()
 # @st.cache(suppress_st_warning=True,allow_output_mutation=True)
 # def openn():
