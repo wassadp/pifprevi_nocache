@@ -432,7 +432,7 @@ if uploaded_file is not None:
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
             df_final.to_excel(writer, sheet_name=name_output)
-            #writer.save()
+            writer.save()
 
             st.download_button(
             label="Télécharger fichier Export pif",
