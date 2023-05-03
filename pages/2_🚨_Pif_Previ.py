@@ -426,20 +426,27 @@ if uploaded_file is not None:
 
 
         directory_exp = "export_pif_du_" + str(start_date.date()) + "_au_" + str(end_date.date()) + ".xlsx"
-        import io
+        from io import BytesIO
         from pyxlsb import open_workbook as open_xlsb
 
-        buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-            df_final.to_excel(writer, sheet_name=name_output)
+        def download_excel(df):
+            output = BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            df.to_excel(writer, sheet_name=name_output, index=False)
             writer.save()
+            processed_data = output.getvalue()
+            return processed_data
+        
+        
+        
 
-            st.download_button(
-            label="Télécharger fichier Export pif",
-            data=buffer,
-            file_name=directory_exp,
-            mime="application/vnd.ms-excel"
-            )
+        processed_data = download_excel(df_final)
+        st.download_button(
+        label="Télécharger fichier Export pif",
+        data=processed_data,
+        file_name=directory_exp,
+        mime="application/vnd.ms-excel"
+        )
                         
 
         st.info("Export PIF créé avec succès !" + "\n\nPour lancer une nouvelle étude, lancer uniquement 'CHOISIR LES DATES'")
