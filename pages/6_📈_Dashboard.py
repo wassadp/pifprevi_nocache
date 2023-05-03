@@ -217,8 +217,8 @@ if uploaded_file is not None:
                     df_final.drop_duplicates(inplace=True)
 
 
-                    writer.save()
-                    df_final.to_excel(writer, sheet_name='Comparaison', index=False)
+                    #writer.save()
+                    #df_final.to_excel(writer, sheet_name='Comparaison', index=False)
                     df_final.to_excel("comparaison.xlsx", sheet_name='Comparaison', index=False)
 
                     return df_final
