@@ -36,11 +36,9 @@ if uploaded_file is not None:
     l_date = pd.to_datetime(df_pgrm['Local Date'].unique().tolist()).date
     l_date = sorted(l_date)
 
-    uploaded_file_config = st.file_uploader("Choisir un fichier de config :", key=15)
-    if uploaded_file_config is not None:
-        @st.cache(suppress_st_warning=True,allow_output_mutation=True)
-        def get_pif_in_fichier_config(pif):
-            return pd.read_excel(uploaded_file_config, sheet_name=pif)
+    @st.cache(suppress_st_warning=True,allow_output_mutation=True)
+    def get_pif_in_fichier_config(pif):
+        return pd.read_excel("fichier_config.xlsx", sheet_name=pif)
     
     # a définir en fonction du fichier de congig
 
