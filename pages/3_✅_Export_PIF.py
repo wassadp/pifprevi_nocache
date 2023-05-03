@@ -73,7 +73,7 @@ if uploaded_file is not None:
             name.reset_index(inplace=True)
             clean(name,i)
             name.to_excel(writer, sheet_name=str(i).replace(" ", "_"), index=False)
-        writer.save()
+        writer.close()
 
         st.download_button(
         label="Télécharger fichier Export pif",

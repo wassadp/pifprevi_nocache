@@ -179,7 +179,7 @@ if uploaded_file2 is not None:
         # Write each dataframe to a different worksheet.
         df_pgrm_concat.to_excel(writer, sheet_name= "pgrm_complet")
         # Close the Pandas Excel writer and output the Excel file to the buffer
-        writer.save()
+        writer.close()
 
         st.download_button(
         label="Télécharger fichier Programme complet",

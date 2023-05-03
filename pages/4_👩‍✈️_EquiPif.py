@@ -314,7 +314,7 @@ if uploaded_file is not None:
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
             x.to_excel(writer, sheet_name="export_equipif")
-            writer.save()
+            writer.close()
 
             st.download_button(
             label="Télécharger fichier Export EquiPIF",

@@ -388,7 +388,7 @@ if uploaded_file is not None:
                 buffer = io.BytesIO()
                 with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
                     df_comp.to_excel(writer, sheet_name='Comparaison', index=False)
-                    writer.save()
+                    writer.close()
 
                     st.download_button(
                     label="Télécharger fichier comparaison",
