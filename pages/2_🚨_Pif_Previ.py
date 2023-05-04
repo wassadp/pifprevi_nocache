@@ -173,7 +173,7 @@ if uploaded_file is not None:
         from datetime import datetime, timedelta
         def HYP_REP(sheet):
             df = pd.read_excel(uploaded_file1, sheet)
-            df['heure'] = pd.to_datetime(df['heure'].str[:8],format='%H.%M.%S')
+            #df['heure'] = pd.to_datetime(df['heure'].str[:8],format='%H.%M.%S')
             return df
 
         df_pgrm_dt['Horaire théorique'] = pd.to_datetime(df_pgrm_dt['Horaire théorique'],format='%H:%M:%S')
@@ -230,6 +230,7 @@ if uploaded_file is not None:
                         if x != 0:
                             temp = df.loc[(df['A/D'] == AD) & (df['Libellé terminal'] == terminal)].copy()
                             temp = temp.loc[(df['Faisceau géographique'] == j)]
+                            st.write(temp)
                             temp = temp.loc[(temp['Horaire théorique'] >= i) & (temp['Horaire théorique'] < n) ]['Pax CNT TOT']*x
                     
                         
