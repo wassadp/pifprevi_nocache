@@ -231,8 +231,8 @@ if uploaded_file is not None:
                             temp = df.loc[(df['A/D'] == AD) & (df['Libellé terminal'] == terminal)].copy()
                             temp = temp.loc[(df['Faisceau géographique'] == j)]
                             st.write(temp)
-                            temp = temp.loc[(temp['Horaire théorique'] >= i) & (temp['Horaire théorique'] < n) ]['Pax CNT TOT']*x
-                    
+                            # temp = temp.loc[(temp['Horaire théorique'] >= i) & (temp['Horaire théorique'] < n) ]['Pax CNT TOT']*x
+                            temp = temp.loc[temp['Plage']== i]['Pax CNT TOT']*x
                         
                             L_df += [temp]
                 return reduce(lambda a, b: a.add(b, fill_value = 0),L_df)
