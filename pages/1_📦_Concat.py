@@ -164,9 +164,9 @@ if uploaded_file2 is not None:
     placeholder.success("Concaténation des prévisions réussie !")
 
     ######### Export PGRM CONCAT ########      
-
+    from datetime import datetime
     placeholder.info("Préparation à l'export du programme complet ...")
-    directory_concat = "pgrm_complet_" + str(pd.datetime.now())[:10] + ".xlsx"
+    directory_concat = "pgrm_complet_" + str(datetime.now())[:10] + ".xlsx"
     df_pgrm_concat.to_excel(directory_concat, sheet_name = "pgrm_complet")
     placeholder.success("Programme complet exporté !")
     placeholder.info("Fin du traitement")
