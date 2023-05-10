@@ -61,7 +61,7 @@ if uploaded_file is not None:
     df_pgrm['Faisceau géographique'].fillna('Autre Afrique', inplace=True)
 
     uploaded_file1 = st.file_uploader("Choisir le fichier hypotheses_repartition_correspondances.xlsx :", key=4)
-    if uploaded_file is not None:
+    if uploaded_file1 is not None:
 
         @st.cache(suppress_st_warning=True,allow_output_mutation=True)
         def COURBE_PRES(t):
@@ -125,6 +125,7 @@ if uploaded_file is not None:
             
             df_faisceaux = FAISCEAUX_IATA()
             
+            placeholder.progress(5)
             
         #        Pour la courbe de pres unique, inutile
         #        def COURBE_PRESENTATION():
@@ -176,6 +177,8 @@ if uploaded_file is not None:
             # df_pgrm_dt['Horaire théorique'] = df_pgrm_dt["Horaire théorique"].apply(lambda x: x.hour)
             df_pgrm_dt = df_pgrm_dt.drop_duplicates(subset=df_pgrm_dt.columns.difference(['Unnamed: 0']))
 
+            placeholder.progress(5)
+
             def DISPATCH_NEW(df):
                 """Permet la création d'un DF dispatch qui facilite le tri par batterie de PIF"""
                 col = ['Local Date', 'Horaire théorique', 'Prov Dest', 'A/D', 'Libellé terminal', 'Faisceau géographique',
@@ -212,7 +215,7 @@ if uploaded_file is not None:
                 dispatch_df.loc[(dispatch_df['A/D'] == 'D') & (~dispatch_df['Affectation'].isin(['E', 'F', 'G'])), 'TOT_théorique'] = dispatch_df['PAX TOT']
                 dispatch_df.loc[(dispatch_df['A/D'] == 'D') & (dispatch_df['Affectation'].isin(['E', 'F', 'G'])), 'TOT_théorique'] = dispatch_df['Pax LOC TOT']
 
-                
+                placeholder.progress(5)
 
                 def dispatch_term(terminal, salle_apport, salle_emport, AD):
                     hyp_rep = HYP_REP(salle_apport + "_" + salle_emport)
@@ -232,6 +235,8 @@ if uploaded_file is not None:
 
                     return reduce(lambda a, b: a.add(b, fill_value = 0),L_df)
 
+                placeholder.progress(5)
+                placeholder.progress(5)
 
                 def dispatch_term_D(terminal, type_pax = 'PAX TOT'):                
                     temp = df.loc[(df['A/D'] == 'D') & (df['Libellé terminal'] == terminal)].copy()
@@ -257,6 +262,7 @@ if uploaded_file is not None:
 
                 dispatch_df['TOT_calcul'] = dispatch_df[L_pif].sum(axis=1)
 
+                placeholder.progress(5)
 
                 for i in L_pif:
                     dispatch_df[i] = dispatch_df[i] / dispatch_df['TOT_calcul']*dispatch_df['TOT_théorique']
@@ -268,7 +274,7 @@ if uploaded_file is not None:
 
             dispatch.to_excel("dispatch.xlsx", sheet_name="dispatch")
             
-            
+            placeholder.progress(5)
             l_courbe_geo_t = {}
             
             for t in list_terminaux:
@@ -285,7 +291,7 @@ if uploaded_file is not None:
                         # st.write(l_courbe_geo_t[t][i][j])
                         l_courbe_geo_t[t][i][j] = temp[j].tolist()
                         
-        
+            placeholder.progress(5)
 
 
             global pb_index
@@ -294,7 +300,7 @@ if uploaded_file is not None:
 
             dispatch_paf = dispatch.copy()
 
-
+            placeholder.progress(5)
 
             dispatch_paf['new_date'] = dispatch_paf['Local Date'].dt.date
             dispatch_paf['new_time'] = dispatch_paf['Horaire théorique'].dt.time
@@ -306,13 +312,14 @@ if uploaded_file is not None:
             dispatch_paf.loc[(dispatch_paf['Libellé terminal'].isin(list_terminaux_P4)) & (dispatch_paf['Horaire théorique']>datetime(1900, 1, 1, 17, 00, 00, 0)), 'Plage'] = 'P6'
             dispatch_paf.loc[(dispatch_paf['Libellé terminal'].isin(list_terminaux_P4)) & (dispatch_paf['Horaire théorique']>datetime(1900, 1, 1, 19, 00, 00, 0)), 'Plage'] = 'P7'
 
-
+            placeholder.progress(5)
 
             dispatch_paf_D = dispatch_paf.copy()
             dispatch_paf_D = dispatch_paf_D[dispatch_paf_D["A/D"] == "D"]
             dispatch_paf_A = dispatch_paf.copy()
             dispatch_paf_A = dispatch_paf_A[dispatch_paf_A["A/D"] == "A"]
-
+            
+            placeholder.progress(5)
 
             n_D = 24
             n_A = 4 #len(L_A)
@@ -331,6 +338,8 @@ if uploaded_file is not None:
                         'Terminal 1',
                         'Terminal 1_5',
                         'Terminal 1_6']
+
+            placeholder.progress(5)
 
             # DEPART
             # Loop through each row in the dataframe
@@ -352,7 +361,9 @@ if uploaded_file is not None:
                     # Append the modified row to the list
                     rows.append(new_row)
                     
-                    
+            placeholder.progress(5)
+            placeholder.progress(5)
+            placeholder.progress(5)  
             # Create a new dataframe from the list of duplicated rows
             new_df = pd.DataFrame(rows)
 
@@ -372,7 +383,9 @@ if uploaded_file is not None:
                     # Append the modified row to the list
                     rows.append(new_row)
                     
-                    
+            placeholder.progress(5)
+            placeholder.progress(5)
+
             # Create a new dataframe from the list of duplicated rows
             new_df_A = pd.DataFrame(rows)
 
@@ -397,7 +410,7 @@ if uploaded_file is not None:
                             'variable':'site',
                             'value':'charge'}, inplace=True)
             
-
+            placeholder.progress(5)
 
             directory_exp = "export_pif_du_" + str(start_date.date()) + "_au_" + str(end_date.date()) + ".xlsx"
             from io import BytesIO  
@@ -412,7 +425,7 @@ if uploaded_file is not None:
                 return processed_data
             
             
-            
+            placeholder.progress(5)
 
             processed_data = download_excel(df_final)
             st.download_button(
