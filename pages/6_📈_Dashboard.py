@@ -10,7 +10,7 @@ import altair as alt
 with open('style.css')as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html = True)
 
-st.title('Dashboard Comparaison')
+st.title('📈 Dashboard Comparaison')
 seuil = {
     'K CNT' : 300, 
     'K CTR' : 1600, 
@@ -401,4 +401,4 @@ if uploaded_file is not None:
                     mime="application/vnd.ms-excel"
                     )  
 
-                st.stop()      
+                     

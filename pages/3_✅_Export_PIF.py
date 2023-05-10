@@ -15,7 +15,7 @@ import itertools
 from datetime import datetime
 locale.setlocale(locale.LC_ALL, "fr_FR")
 
-st.title("Macro final")
+st.title("✅ Macro final")
 st.write("Macro du fichier Export_pif final")
 
 def findDay(date):

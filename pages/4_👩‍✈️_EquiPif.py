@@ -21,7 +21,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 #########################
 
-st.title('EquiPif')
+st.title('👩‍✈️ EquiPif')
 st.subheader("Programme complet :")
 
 # Import

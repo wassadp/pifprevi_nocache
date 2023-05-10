@@ -17,7 +17,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 ######### Input #########
 
 #   Noms des feuilles, peut changer dans le temps si qqn le modifie
-st.title("Concat")
+st.title("📦 Concat")
 name_sheet_cies = "pgrm_cies"
 name_sheet_af = "Programme brut"
 
