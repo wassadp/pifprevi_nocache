@@ -20,7 +20,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.title("Concat")
 name_sheet_cies = "pgrm_cies"
 name_sheet_af = "Programme brut"
-name_sheet_oal = "affectation_oal_t2e"
+
 st.subheader("Prévision activité AF 1 :")
 
 @st.cache(suppress_st_warning=True,allow_output_mutation=True)
@@ -28,6 +28,7 @@ def get_dispatch_sat_T1(sat):
     df = pd.read_excel("fichier_config_PIF.xlsx", sheet_name="dispatch_sat")
     df = df.fillna("XXXXX")
     return list(df[sat])
+
 
 uploaded_file = st.file_uploader("Choisir un fichier :", key=1)
 if uploaded_file is not None:
@@ -143,11 +144,6 @@ if uploaded_file is not None:
         del df_concat['index']
         df_pgrm_concat = df_concat.copy() # inutile pour le moment
         df_pgrm_concat['Plage'] = df_pgrm_concat['Plage'].fillna(value = "P4")
-
-
-
-
-
 
         #   A automatiser car ne prend pas toutes les cies en compte, ex ici c'est RC
         df_pgrm_concat = df_pgrm_concat.dropna(subset=['Pax LOC TOT'])
