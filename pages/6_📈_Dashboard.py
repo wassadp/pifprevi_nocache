@@ -399,4 +399,6 @@ if uploaded_file is not None:
                     data=buffer,
                     file_name=directory_exp,
                     mime="application/vnd.ms-excel"
-                    )    
+                    )  
+
+                st.stop()      

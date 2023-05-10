@@ -44,10 +44,10 @@ if uploaded_file is not None:
             df_af_1 = df_af_1.rename(columns={"Jour":"Jour (nb)",
                                     "Service emb/deb":"Libellé terminal",
                                     "Scheduled Local Time 2":"Horaire théorique"})
-        st.success("Prévision AF 1 chargée !")
         return df_af_1
     
     df_af_1 = previ_af()
+    st.success("Prévision AF 1 chargée !")
 
     st.subheader("Prévision activité ADP :")
     uploaded_file2 = st.file_uploader("Choisir un fichier :", key=3)
@@ -76,13 +76,14 @@ if uploaded_file is not None:
                 df_cies_1["Libellé terminal"] = df_cies_1['Libellé terminal'].str.replace("C2G","Terminal 2G")
                 df_cies_1["Libellé terminal"] = df_cies_1['Libellé terminal'].str.replace("C1","T1_Inter")
                 df_cies_1["Libellé terminal"] = df_cies_1['Libellé terminal'].str.replace("CT","Terminal 3")
-            st.success("Prévisions ADP chargées !")
+            
             return df_cies_1
 
         df_cies_1 = previ_adp()
+        st.success("Prévisions ADP chargées !")
 
 
-
+        st.markdown('--------------------')
         ######### Traitement #########
 
 
@@ -190,6 +191,8 @@ if uploaded_file is not None:
             mime="application/vnd.ms-excel"
             )
         
-        st.markdown('<a href="/" target="_self">Revenir à l\'Accueil</a>', unsafe_allow_html=True)
-        st.markdown('<a href="/Pif_Previ_" target="_self">Aller directement à l\'outils Pif prévi</a>', unsafe_allow_html=True)
+
+        st.stop()
+        # st.markdown('<a href="/" target="_self">Revenir à l\'Accueil</a>', unsafe_allow_html=True)
+        # st.markdown('<a href="/Pif_Previ_" target="_self">Aller directement à l\'outils Pif prévi</a>', unsafe_allow_html=True)
 
