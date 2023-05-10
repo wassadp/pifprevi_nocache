@@ -64,10 +64,9 @@ if uploaded_file is not None:
 
     @st.cache(suppress_st_warning=True,allow_output_mutation=True)
     def COURBE_PRES(t):
-        x=78
         df = pd.read_excel('courbes_presentation_V5.xlsx', t)
-
-        return df       
+        return df  
+         
     col1, col2 = st.columns(2)
     with col1:
         debut = st.date_input("Date de début :", key=10)
@@ -79,11 +78,7 @@ if uploaded_file is not None:
 
     if st.button('Créer Export PIF'):
     
-
-
-        #Fonction qui regroupe les sous fonctions de traitement
-
-
+    #Fonction qui regroupe les sous fonctions de traitement
         
         st.warning('La requête a bien été prise en compte, début du traitement.\nNe tentez pas de fermer la fenêtre même si celle-ci semble figée')
         placeholder = st.empty()
@@ -173,7 +168,7 @@ if uploaded_file is not None:
         from datetime import datetime, timedelta
         def HYP_REP(sheet):
             df = pd.read_excel(uploaded_file1, sheet)
-            #df['heure'] = pd.to_datetime(df['heure'].str[:8],format='%H.%M.%S')
+            # df['heure'] = pd.to_datetime(df['heure'].str[:8],format='%H.%M.%S')
             return df
 
         df_pgrm_dt['Horaire théorique'] = pd.to_datetime(df_pgrm_dt['Horaire théorique'],format='%H:%M:%S')
@@ -230,11 +225,10 @@ if uploaded_file is not None:
                         if x != 0:
                             temp = df.loc[(df['A/D'] == AD) & (df['Libellé terminal'] == terminal)].copy()
                             temp = temp.loc[(df['Faisceau géographique'] == j)]
-                            st.write(temp)
                             # temp = temp.loc[(temp['Horaire théorique'] >= i) & (temp['Horaire théorique'] < n) ]['Pax CNT TOT']*x
                             temp = temp.loc[temp['Plage']== i]['Pax CNT TOT']*x
-                        
                             L_df += [temp]
+
                 return reduce(lambda a, b: a.add(b, fill_value = 0),L_df)
 
 
@@ -412,15 +406,6 @@ if uploaded_file is not None:
                          'Horaire théorique':'heure',
                          'variable':'site',
                          'value':'charge'}, inplace=True)
-
-
-        import time
-        def CLEAN_TIME(m):
-            t = '0:00'.join(str(m).rsplit('5:00', 1))
-            #l = [int(k) for k in t.split(':')]
-            time_r = time(hour = int(t[11:13]), minute = int(t[14:16]), second = int(t[17:19]))
-
-            return time_r
         
 
 
