@@ -256,7 +256,7 @@ if uploaded_file is not None:
         def CREATE_DF_SITE(dispatch_df, site):
             """Permet de créer le format de l'export pif final"""
             c = ['jour', 'heure', 'site', 'charge', 'type']
-            l_pas10min = pd.date_range(pd.datetime(2022,1,1), periods=144, freq="10T").time.tolist()
+            l_pas10min = pd.date_range(datetime(2022,1,1), periods=144, freq="10T").time.tolist()
             df = pd.DataFrame(columns=c)
             l_jour = dispatch_df['Local Date'].sort_values(ascending = True).unique().tolist()
             nb_jour = len(l_jour)
