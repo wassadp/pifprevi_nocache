@@ -66,12 +66,7 @@ if uploaded_file is not None:
 
     df_pgrm['Effectif'].fillna(8, inplace=True)
     nan_eff = df_pgrm[~df_pgrm['Effectif'].notnull()]
-    st.write(list(nan_eff['Sous-type avion'].unique()))
-
-    st.write(df_pgrm['Effectif'].sum())
-
-
-
+    # st.write(list(nan_eff['Sous-type avion'].unique()))
 
     st.subheader("Choix de la période :")
     col1, col2 = st.columns(2)
@@ -167,12 +162,10 @@ if uploaded_file is not None:
         df_pgrm_dt_MP['Horaire théorique'].loc[~(df_pgrm_dt_MP['Libellé terminal'].isin(L1))] = pd.to_datetime(pd.to_datetime(df_pgrm_dt_MP['Horaire théorique'].loc[~(df_pgrm_dt_MP['Libellé terminal'].isin(L1))]) - pd.Timedelta(minutes=50),format='%Y-%m-%d %H:%M:%S').round("10min").dt.strftime('%H:%M:%S')
         
         df_pgrm_dt = pd.concat([df_pgrm_dt_MP, df_pgrm_dt_GP])
-        st.write(df_pgrm_dt)
 
         df_pgrm_dt.reset_index(inplace=True)
         
         df_pgrm_dt = df_pgrm_dt.drop_duplicates(subset=df_pgrm_dt.columns.difference(['Unnamed: 0']))
-        st.write(df_pgrm_dt['Effectif'][df_pgrm_dt['A/D'] == 'D'].sum())  
 
             ### DISPATCH ###
 
@@ -258,7 +251,6 @@ if uploaded_file is not None:
 
         dispatch = dispatch.groupby(by=['Local Date', 'Horaire théorique']).sum().reset_index()
 
-        st.write(dispatch)
         from scipy import signal 
             
         def CREATE_DF_SITE(dispatch_df, site):
