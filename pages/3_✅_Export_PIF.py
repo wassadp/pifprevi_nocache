@@ -30,10 +30,10 @@ if uploaded_file is not None:
     writer = pd.ExcelWriter('multiple3.xlsx', engine='xlsxwriter')
 
     def clean(df,i):
+        df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:, 1:145].sum(axis=1)
         df['Numéro de Jour'] = df['jour'].dt.day
         df['Date complète'] = df['jour'].dt.strftime('%d/%m/%Y')
-        df['Jour de la semaine'] = df['jour'].dt.day_name(locale="fr_FR")
-        df['SOMME PAX LOCAUX DE LA JOURNEE'] = df.iloc[:, 1:145].sum(axis=1)     
+        df['Jour de la semaine'] = df['jour'].dt.day_name(locale="fr_FR")     
         g = str(i).replace(" ", "_")
         df[str(i).replace(" ", "_")] = df['jour'].dt.month_name(locale="fr_FR")
         df["Jour férié ?"] = ""
@@ -71,6 +71,7 @@ if uploaded_file is not None:
             name = name[name['site'] == i]
             name = name.pivot_table(values='charge', index='jour', columns=['heure'], aggfunc='first')
             name.reset_index(inplace=True)
+            name.fillna(0, inplace=True)
             clean(name,i)
             name.to_excel(writer, sheet_name=str(i).replace(" ", "_"), index=False)
         writer.close()
