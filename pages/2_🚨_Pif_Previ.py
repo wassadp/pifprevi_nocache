@@ -40,20 +40,14 @@ if uploaded_file is not None:
     def get_pif_in_fichier_config(pif):
         return pd.read_excel("fichier_config_PIF.xlsx", sheet_name=pif)
     
-    # a définir en fonction du fichier de congig
+    @st.cache(suppress_st_warning=True,allow_output_mutation=True)
+    def get_pif():
+        df = pd.read_excel("fichier_config_PIF.xlsx", sheet_name="Config")
+        df = df.fillna("XXXXX")
+        return list(df['PIF'])
 
-    L_pif = ['K CNT', 'K CTR', 
-                    'L CNT', 'L CTR', 
-                    'M CTR', 
-                    'Galerie EF', 'C2F', 
-                    'C2G', 
-                    'Liaison AC', 
-                    'Liaison BD', 
-                    'T3',
-                    'Terminal 1',
-                    'Terminal 1_5',
-                    'Terminal 1_6']
-    
+    L_pif = get_pif()
+
     table_faisceau_iata = pd.read_excel("table_faisceau_IATA (2).xlsx")
     table_faisceau_iata.rename(columns={"Code aéroport IATA":"Prov Dest"}, inplace=True)
     table_faisceau_iata = table_faisceau_iata[['Prov Dest','Faisceau géographique']]
@@ -183,18 +177,7 @@ if uploaded_file is not None:
 
             def DISPATCH_NEW(df):
                 """Permet la création d'un DF dispatch qui facilite le tri par batterie de PIF"""
-                col = ['Local Date', 'Horaire théorique', 'Prov Dest', 'A/D', 'Libellé terminal', 'Faisceau géographique',
-                        'K CNT', 'K CTR', 
-                        'L CNT', 'L CTR', 
-                        'M CTR', 
-                        'Galerie EF', 'C2F', 
-                        'C2G', 
-                        'Liaison AC', 
-                        'Liaison BD', 
-                        'T3',
-                        'Terminal 1',
-                        'Terminal 1_5',
-                        'Terminal 1_6']
+                col = ['Local Date', 'Horaire théorique', 'Prov Dest', 'A/D', 'Libellé terminal', 'Faisceau géographique'] + L_pif
 
                 dispatch_df = pd.DataFrame(columns = col, index = df['Unnamed: 0'])
 
@@ -329,17 +312,6 @@ if uploaded_file is not None:
             # Create a list to store the duplicated rows
             rows = []
             L_A = [0, 0, 0.5, 0.5]
-            L_pif = ['K CNT', 'K CTR', 
-                        'L CNT', 'L CTR', 
-                        'M CTR', 
-                        'Galerie EF', 'C2F', 
-                        'C2G', 
-                        'Liaison AC', 
-                        'Liaison BD', 
-                        'T3',
-                        'Terminal 1',
-                        'Terminal 1_5',
-                        'Terminal 1_6']
 
             my_bar2.progress(90)
 
